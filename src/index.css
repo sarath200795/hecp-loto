@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #2a2823;
+  background-color: #efe8e4;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  /* Puffy clay surface */
+  .clay-card {
+    @apply rounded-2xl bg-claySurface shadow-clay;
+  }
+  /* Pressed-in clay well (inputs, code chips) */
+  .clay-inset {
+    @apply rounded-xl bg-clay shadow-clay-inset;
+  }
+}
+
+/* Backdrop used on auth / scan screens — flat swatch with a whisper of warmth */
+.hecp-grid-bg {
+  background-color: #efe8e4;
+  background-image:
+    radial-gradient(circle at 16% 18%, rgba(255, 204, 26, 0.08), transparent 46%),
+    radial-gradient(circle at 84% 12%, rgba(255, 204, 26, 0.05), transparent 46%);
+}
+
+/* Hazard-stripe accent bar — black & yellow caution */
+.hazard-stripes {
+  background: repeating-linear-gradient(
+    45deg,
+    #ffcc1a,
+    #ffcc1a 14px,
+    #1d1b17 14px,
+    #1d1b17 28px
+  );
+}
+
+/* Light clay scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #ddd7ca;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c2bcb0;
+  background-clip: content-box;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #a39d91;
+}
+
+::selection {
+  background: rgba(255, 204, 26, 0.4);
+  color: #1d1b17;
+}

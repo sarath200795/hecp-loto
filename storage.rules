@@ -1,0 +1,34 @@
+rules_version = '2';
+
+// ---------------------------------------------------------------------------
+// HECP / LOTO — Storage rules for isolation-point photos.
+// Path: organizations/{orgId}/procedures/{procedureId}/{file}
+// Reads are public (download URLs are embedded in procedures shown via the
+// public QR scan view). Writes require an authenticated user who belongs to
+// the org and can create/revise procedures.
+// ---------------------------------------------------------------------------
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function memberOf(orgId) {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.orgId == orgId
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.status == 'approved';
+    }
+
+    match /organizations/{orgId}/procedures/{procedureId}/{fileName} {
+      allow read: if true;
+      // Limit uploads to images under 8 MB by members of the org.
+      allow write: if memberOf(orgId)
+        && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if memberOf(orgId);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
