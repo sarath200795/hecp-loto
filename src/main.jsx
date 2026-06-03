@@ -4,6 +4,12 @@ import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
+// Self-hosted Inter (no external font CDN → no CSP/privacy concerns).
+import '@fontsource/inter/400.css'
+import '@fontsource/inter/500.css'
+import '@fontsource/inter/600.css'
+import '@fontsource/inter/700.css'
+import '@fontsource/inter/800.css'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
