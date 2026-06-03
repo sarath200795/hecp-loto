@@ -20,7 +20,10 @@ Real-time Firestore data throughout, animated UI (Framer Motion), Tailwind styli
 
 ## Tech stack
 
-Vite · React (JSX) · React Router · Firebase (Auth + Firestore + Storage) · Tailwind CSS · Framer Motion · react-hot-toast
+Vite · React (JSX) · React Router · Firebase (Auth + Firestore) · Tailwind CSS · Framer Motion · react-hot-toast
+Quality: ESLint · Prettier · Vitest + Testing Library · GitHub Actions (CI, CodeQL, Vercel deploy, Firestore-rules deploy) · Dependabot
+
+> Members join by selecting their organization from a dropdown at sign-up (admin then approves); the legacy join code is no longer required.
 
 ## 1. Firebase setup
 
@@ -54,7 +57,24 @@ VITE_FIREBASE_APP_ID=...
 # Optional — only if your Firestore database is NOT named "(default)".
 # Set it to your named database's Database ID; otherwise leave blank.
 VITE_FIREBASE_FIRESTORE_DB=
+
+# Optional — Firebase App Check (reCAPTCHA v3) site key. Leave blank to disable.
+VITE_FIREBASE_RECAPTCHA_KEY=
 ```
+
+> The `VITE_FIREBASE_*` values are a **public client identifier**, not secrets — access is enforced by [`firestore.rules`](./firestore.rules) and (optionally) App Check. Keep them in `.env.local` (git-ignored) for local dev and in your host's env for production.
+
+## Scripts & quality gates
+
+```bash
+npm run dev        # local dev server
+npm run lint       # ESLint
+npm run test       # Vitest (watch)   ·   npm run test:run = single run
+npm run build      # production build
+npm run format     # Prettier write   ·   npm run format:check = verify
+```
+
+CI runs `lint`, `test:run`, `build`, `npm audit`, and CodeQL on every push/PR.
 
 ## 3. Run
 
@@ -80,12 +100,52 @@ Open the printed URL (default <http://localhost:5173>).
 
 > The QR code encodes `https://<your-domain>/p/<procedureId>`. On `localhost` it points to localhost; once deployed it points to your Vercel domain, so regenerate/print tags from the deployed app for real-world scanning.
 
-## 5. Deploy to Vercel
+## 5. Deploy (CI/CD)
 
-1. Push this repo to GitHub and import it in Vercel (framework preset: **Vite**).
-2. Add the six `VITE_FIREBASE_*` variables under **Project → Settings → Environment Variables**.
-3. Deploy. [`vercel.json`](./vercel.json) already rewrites all routes to `index.html` for client-side routing.
-4. In Firebase **Authentication → Settings → Authorized domains**, add your Vercel domain.
+The repo ships with GitHub Actions:
+
+- **CI** (`.github/workflows/ci.yml`) — lint, test, build, dependency audit on every push/PR.
+- **CodeQL** (`.github/workflows/codeql.yml`) — static security analysis.
+- **Deploy** (`.github/workflows/deploy.yml`) — **preview** deploy on PRs, **production** on push to `main`, via the Vercel CLI.
+- **Firestore rules** (`.github/workflows/firestore-rules.yml`) — auto-publishes `firestore.rules` on `main` when they change (no manual console re-paste).
+
+[`vercel.json`](./vercel.json) rewrites routes to `index.html` and sets HTTP **security headers** (CSP, HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, frame-ancestors).
+
+### Required GitHub repository secrets
+
+Add under **GitHub → Settings → Secrets and variables → Actions**:
+
+| Secret                     | Where to get it                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| `VERCEL_TOKEN`             | vercel.com → Account → Tokens                                                   |
+| `VERCEL_ORG_ID`            | local `.vercel/project.json` → `orgId` (run `vercel link` once)                 |
+| `VERCEL_PROJECT_ID`        | local `.vercel/project.json` → `projectId`                                      |
+| `FIREBASE_SERVICE_ACCOUNT` | Firebase Console → Project settings → Service accounts → Generate key (paste the JSON) — _optional, enables rules auto-deploy_ |
+
+The deploy/rules workflows **skip cleanly (green) until these secrets exist**, so CI stays green on the first PR. Set the `VITE_FIREBASE_*` env vars in the **Vercel project** (Settings → Environment Variables) — the deploy workflow pulls them via `vercel pull`.
+
+### One-time setup
+
+1. In Firebase **Authentication → Settings → Authorized domains**, add your production domain (e.g. `hecp-loto.vercel.app`).
+2. Enable **branch protection** on `main` (require CI to pass + a review).
+3. (Optional) Enable **Firebase App Check** (console) and set `VITE_FIREBASE_RECAPTCHA_KEY`.
+
+## 6. Security
+
+- **Authorization** is enforced server-side in [`firestore.rules`](./firestore.rules): per-`orgId` isolation, role/permission gates, immutable `orgId`, write-shape validation, an append-only audit log (`lotoEvents`), and documented public single-doc reads for QR scanning. The UI mirrors these for UX only.
+- **HTTP headers** + CSP are set in `vercel.json`.
+- **Scanning:** Dependabot + `npm audit` (dependencies) on every repo; **CodeQL** (source) runs automatically on **public** repos or when **GitHub Advanced Security** is enabled — it is skipped on private repos (so CI stays green) and turns on by itself once available.
+- **Optional App Check** (reCAPTCHA v3) gates Firestore/Auth against abuse.
+- Report vulnerabilities per [`SECURITY.md`](./SECURITY.md). Never commit secrets — `.env*.local` and service-account keys are git-ignored.
+
+## 7. Legal & safety
+
+- **License:** [MIT](./LICENSE).
+- **Privacy / Terms / Disclaimer:** [`PRIVACY.md`](./PRIVACY.md), [`TERMS.md`](./TERMS.md), [`DISCLAIMER.md`](./DISCLAIMER.md) — also available in-app at `/privacy` and `/terms`, with a required consent checkbox at sign-up.
+- **Safety:** HECP LOTO assists with LOTO documentation; it **does not verify physical energy isolation** and is **not a substitute** for a compliant energy-control program or qualified personnel (e.g. OSHA 29 CFR 1910.147). See the disclaimer.
+- Replace the bracketed placeholders (company legal name, contact emails, governing jurisdiction) in the legal docs before production use.
+
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the contributor workflow.
 
 ## Project structure
 

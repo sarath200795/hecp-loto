@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Sidebar from './components/Sidebar'
+import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useAuth } from './context/AuthContext'
 import { isFirebaseConfigured } from './firebase/config'
@@ -26,6 +27,8 @@ const Operations = lazy(() => import('./pages/operations/Operations'))
 const OperateProcedure = lazy(() => import('./pages/operations/OperateProcedure'))
 const Technicians = lazy(() => import('./pages/admin/Technicians'))
 const LockInventory = lazy(() => import('./pages/admin/LockInventory'))
+const Privacy = lazy(() => import('./pages/legal/Privacy'))
+const Terms = lazy(() => import('./pages/legal/Terms'))
 
 // Wraps each route in a subtle enter animation.
 function Page({ children }) {
@@ -47,6 +50,7 @@ function AppLayout() {
       <Sidebar />
       <main className="lg:ml-64">
         <Outlet />
+        <Footer />
       </main>
     </div>
   )
@@ -147,6 +151,24 @@ export default function App() {
           element={
             <Page>
               <ScanView />
+            </Page>
+          }
+        />
+
+        {/* Public legal pages */}
+        <Route
+          path="/privacy"
+          element={
+            <Page>
+              <Privacy />
+            </Page>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <Page>
+              <Terms />
             </Page>
           }
         />

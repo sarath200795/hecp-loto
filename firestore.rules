@@ -1,11 +1,19 @@
 rules_version = '2';
 
 // ---------------------------------------------------------------------------
-// HECP / LOTO — Phase 1 security rules.
-// Enforces multi-tenant isolation (per orgId) and admin-only user management.
-// NOTE: organizations are readable by any signed-in user so the signup flow
-// can resolve a join code. A later phase will replace this with a callable
-// Cloud Function and lock organization reads to members only.
+// HECP / LOTO — Firestore security rules.
+//
+// Multi-tenant isolation by `orgId`, role/permission enforcement, and an
+// append-only audit trail. Deliberate PUBLIC reads (documented, minimal):
+//   * organizations  — get/list only, so the signup screen can show the org
+//                       dropdown BEFORE a user authenticates. Only org names
+//                       are exposed; all member/procedure data stays protected.
+//   * procedures      — single-doc GET only, so a scanned QR code can display a
+//                       procedure without login. Listing/querying still requires
+//                       being an approved org member. Performing LOTO requires
+//                       auth + loto.perform + status == 'approved'.
+//   * procedurePhotos — single-doc GET only (the QR scan view shows photos).
+// Everything else is members-only and write access is permission-gated.
 // ---------------------------------------------------------------------------
 
 service cloud.firestore {
@@ -40,13 +48,25 @@ service cloud.firestore {
       return isApprovedMember() && (p in me().permissions);
     }
 
+    // orgId is a non-empty string and matches the caller's org.
+    function inMyOrg() {
+      return request.resource.data.orgId is string
+        && request.resource.data.orgId == me().orgId;
+    }
+
+    // orgId can never change on update (no cross-tenant moves).
+    function orgUnchanged() {
+      return request.resource.data.orgId == resource.data.orgId;
+    }
+
     match /organizations/{orgId} {
-      // Public so the signup org dropdown can load before the user authenticates.
-      allow read: if true;
+      // Public get/list so the signup org dropdown can load pre-auth.
+      allow get, list: if true;
       // Creator stamps themselves as createdBy; that powers the admin-user check.
       allow create: if signedIn()
-        && request.resource.data.createdBy == request.auth.uid;
-      allow update, delete: if false; // not editable from the client in phase 1
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.name is string;
+      allow update, delete: if false; // not editable from the client
     }
 
     match /users/{uid} {
@@ -80,7 +100,7 @@ service cloud.firestore {
       // and may never move a user to a different organization.
       allow update: if isOrgManager(resource.data.orgId)
         && request.auth.uid != uid
-        && request.resource.data.orgId == resource.data.orgId;
+        && orgUnchanged();
 
       allow delete: if false;
     }
@@ -93,16 +113,16 @@ service cloud.firestore {
       allow list: if isApprovedMember() && resource.data.orgId == me().orgId;
 
       allow create: if isApprovedMember()
-        && request.resource.data.orgId == me().orgId
+        && inMyOrg()
         && hasPerm('procedure.create');
 
       // Coarse-grained: any approved member of the org holding a relevant
-      // permission may update (revise / approve / send / lock-out). The UI
-      // enforces which action each role performs; org + approval are hard
-      // requirements here, and orgId can never change.
+      // permission may update (revise / approve / send / lock-out). orgId is
+      // immutable and status must stay a known value.
       allow update: if isApprovedMember()
         && resource.data.orgId == me().orgId
-        && request.resource.data.orgId == resource.data.orgId
+        && orgUnchanged()
+        && request.resource.data.status in ['draft', 'pending_approval', 'approved', 'rejected']
         && (
           hasPerm('procedure.revise')
           || hasPerm('procedure.approve')
@@ -120,10 +140,12 @@ service cloud.firestore {
     match /technicians/{id} {
       allow read: if isApprovedMember() && resource.data.orgId == me().orgId;
       allow create: if isApprovedMember()
-        && request.resource.data.orgId == me().orgId
+        && inMyOrg()
+        && request.resource.data.name is string
         && ('users.manage' in me().permissions);
       allow update, delete: if isApprovedMember()
         && resource.data.orgId == me().orgId
+        && orgUnchanged()
         && ('users.manage' in me().permissions);
     }
 
@@ -131,10 +153,14 @@ service cloud.firestore {
     match /locks/{id} {
       allow read: if isApprovedMember() && resource.data.orgId == me().orgId;
       allow create: if isApprovedMember()
-        && request.resource.data.orgId == me().orgId
+        && inMyOrg()
+        && request.resource.data.lockNo is string
+        && request.resource.data.type in ['personal', 'department']
         && ('users.manage' in me().permissions);
       allow update, delete: if isApprovedMember()
         && resource.data.orgId == me().orgId
+        && orgUnchanged()
+        && request.resource.data.type in ['personal', 'department']
         && ('users.manage' in me().permissions);
     }
 
@@ -142,7 +168,7 @@ service cloud.firestore {
     match /lotoEvents/{id} {
       allow read: if isApprovedMember() && resource.data.orgId == me().orgId;
       allow create: if isApprovedMember()
-        && request.resource.data.orgId == me().orgId
+        && inMyOrg()
         && hasPerm('loto.perform');
       allow update, delete: if false;
     }
@@ -153,14 +179,14 @@ service cloud.firestore {
       allow get: if true; // public so the QR scan view can show photos
       allow list: if false;
       allow create, update: if isApprovedMember()
-        && request.resource.data.orgId == me().orgId
+        && inMyOrg()
         && (hasPerm('procedure.create') || hasPerm('procedure.revise'));
       allow delete: if isApprovedMember()
         && resource.data.orgId == me().orgId
         && hasPerm('procedure.delete');
     }
 
-    // Everything else is denied until later phases add their own rules.
+    // Everything else is denied.
     match /{document=**} {
       allow read, write: if false;
     }

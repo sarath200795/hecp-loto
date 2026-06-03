@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import LockMcbMark from './LockMcbMark'
 
 /**
@@ -68,7 +69,7 @@ export default function AuthShell({ title, subtitle, children, footer }) {
       </div>
 
       {/* Form panel */}
-      <div className="flex w-full items-center justify-center p-6 lg:w-1/2">
+      <div className="flex w-full flex-col items-center justify-center p-6 lg:w-1/2">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -85,6 +86,17 @@ export default function AuthShell({ title, subtitle, children, footer }) {
           <div className="mt-7">{children}</div>
           {footer && <div className="mt-6 text-center text-sm text-steel-400">{footer}</div>}
         </motion.div>
+        <p className="mt-6 max-w-md text-center text-xs text-steel-500">
+          By continuing you agree to our{' '}
+          <Link to="/terms" className="hover:text-amber-600">
+            Terms
+          </Link>{' '}
+          and{' '}
+          <Link to="/privacy" className="hover:text-amber-600">
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
     </div>
   )
