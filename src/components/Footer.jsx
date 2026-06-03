@@ -16,21 +16,20 @@ export default function Footer() {
           <span>© {year} HECP LOTO</span>
           <span aria-hidden>·</span>
           <Link to="/privacy" className="hover:text-amber-600">
-            Privacy
+            Privacy Policy
           </Link>
           <span aria-hidden>·</span>
           <Link to="/terms" className="hover:text-amber-600">
-            Terms
+            Terms of Service
           </Link>
           <span aria-hidden>·</span>
-          <a
-            href="https://github.com/sarath200795/hecp-loto"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-amber-600"
-          >
-            Source (MIT)
-          </a>
+          <Link to="/data-retention" className="hover:text-amber-600">
+            Data Retention
+          </Link>
+          <span aria-hidden>·</span>
+          <Link to="/cookies" className="hover:text-amber-600">
+            Cookies &amp; Storage
+          </Link>
         </p>
       </div>
     </footer>
