@@ -1,0 +1,45 @@
+name: Deploy Firestore Rules
+
+# Publishes firestore.rules to the Firebase project whenever they change on main,
+# so the live database always matches the repo (no manual console re-paste).
+on:
+  push:
+    branches: [main]
+    paths:
+      - firestore.rules
+      - firebase.json
+
+permissions:
+  contents: read
+
+jobs:
+  rules:
+    name: Publish rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check service account
+        id: check
+        run: |
+          if [ -n "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT not set — skipping rules deploy. Add the secret to enable."
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.ok == 'true'
+        with:
+          node-version: 20
+
+      - name: Write service-account credentials
+        if: steps.check.outputs.ok == 'true'
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "$RUNNER_TEMP/sa.json"
+
+      - name: Deploy firestore rules
+        if: steps.check.outputs.ok == 'true'
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
+        run: npx -y firebase-tools deploy --only firestore:rules --project hecp-65b6a --non-interactive

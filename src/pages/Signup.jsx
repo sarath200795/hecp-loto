@@ -20,6 +20,7 @@ export default function Signup() {
     confirm: '',
     orgId: '',
   })
+  const [consent, setConsent] = useState(false)
   const [orgs, setOrgs] = useState([])
   const [orgsLoading, setOrgsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -44,6 +45,7 @@ export default function Signup() {
     if (!form.orgId) return setError('Please select your organization.')
     if (form.password !== form.confirm) return setError('Passwords do not match.')
     if (form.password.length < 6) return setError('Password must be at least 6 characters.')
+    if (!consent) return setError('Please accept the Terms and Privacy Policy to continue.')
     setLoading(true)
     try {
       const { orgName } = await signupMember(form)
@@ -135,10 +137,29 @@ export default function Signup() {
             placeholder="••••••••"
           />
         </div>
+        <label className="flex items-start gap-2 text-xs text-steel-300">
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 accent-hazard"
+          />
+          <span>
+            I agree to the{' '}
+            <Link to="/terms" target="_blank" className="font-semibold text-amber-600">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link to="/privacy" target="_blank" className="font-semibold text-amber-600">
+              Privacy Policy
+            </Link>
+            , and understand this tool does not replace a compliant LOTO program.
+          </span>
+        </label>
         {error && (
           <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>
         )}
-        <Button type="submit" loading={loading} className="w-full" size="lg">
+        <Button type="submit" loading={loading} className="w-full" size="lg" disabled={!consent}>
           Request access
         </Button>
       </form>

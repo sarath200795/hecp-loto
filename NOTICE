@@ -1,0 +1,23 @@
+HECP LOTO
+Copyright (c) 2026 HECP LOTO
+
+This product is licensed under the MIT License (see LICENSE).
+
+It includes third-party open-source software, each under its own license.
+Primary dependencies and their licenses:
+
+- react, react-dom .................. MIT (Meta Platforms, Inc.)
+- react-router-dom .................. MIT (Remix Software)
+- firebase (JS SDK) ................. Apache-2.0 (Google LLC)
+- framer-motion ..................... MIT (Framer B.V.)
+- jspdf ............................. MIT (James Hall and contributors)
+- jspdf-autotable ................... MIT (Simon Bengtsson)
+- qrcode ............................ MIT (Ryan Day)
+- react-hot-toast ................... MIT (Timo Lins)
+- tailwindcss ....................... MIT (Tailwind Labs, Inc.)
+- vite, @vitejs/plugin-react ........ MIT (Evan You and Vite contributors)
+- eslint, prettier, vitest .......... MIT (respective authors)
+
+Full license texts are available in each package under node_modules/<pkg>.
+This NOTICE is informational; the authoritative terms are those shipped with
+each dependency.
