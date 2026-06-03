@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Sidebar from './components/Sidebar'
 import Footer from './components/Footer'
+import SessionTimeout from './components/SessionTimeout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useAuth } from './context/AuthContext'
 import { isFirebaseConfigured } from './firebase/config'
@@ -47,6 +48,7 @@ function Page({ children }) {
 function AppLayout() {
   return (
     <div className="min-h-screen bg-clay">
+      <SessionTimeout />
       <Sidebar />
       <main className="lg:ml-64">
         <Outlet />

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import AuthShell from '../components/AuthShell'
@@ -6,6 +6,7 @@ import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 import { useAuth } from '../context/AuthContext'
 import { friendlyAuthError } from '../utils/authErrors'
+import { takeSessionExpiredFlag } from '../utils/session'
 
 export default function Login() {
   const { login } = useAuth()
@@ -16,6 +17,13 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
 
   const from = location.state?.from?.pathname || '/app'
+
+  // Notify when the previous session ended due to inactivity.
+  useEffect(() => {
+    if (takeSessionExpiredFlag()) {
+      toast('Signed out due to inactivity.', { icon: '🔒' })
+    }
+  }, [])
 
   function update(key) {
     return (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
