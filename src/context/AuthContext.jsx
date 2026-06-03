@@ -28,6 +28,7 @@ import {
   hasPermission as listHasPermission,
   permissionsForRole,
 } from '../constants/roles'
+import { clearSessionExpiredFlag, logActivity } from '../utils/session'
 
 const AuthContext = createContext(null)
 
@@ -131,6 +132,9 @@ export function AuthProvider({ children }) {
 
   async function login(email, password) {
     const cred = await signInWithEmailAndPassword(auth, email.trim(), password)
+    // Fresh session: clear any stale "expired" flag and start the idle clock.
+    clearSessionExpiredFlag()
+    logActivity()
     return cred.user
   }
 

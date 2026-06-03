@@ -60,7 +60,13 @@ VITE_FIREBASE_FIRESTORE_DB=
 
 # Optional — Firebase App Check (reCAPTCHA v3) site key. Leave blank to disable.
 VITE_FIREBASE_RECAPTCHA_KEY=
+
+# Optional — session/inactivity timeout (defaults: 30 min idle, 60s warning).
+VITE_SESSION_IDLE_MINUTES=30
+VITE_SESSION_WARN_SECONDS=60
 ```
+
+**Sessions:** login uses Firebase **session persistence** (closing the browser ends the session) plus an **idle timeout** — after `VITE_SESSION_IDLE_MINUTES` of inactivity a warning modal counts down, then the user is signed out and returned to the login screen with a notice.
 
 > The `VITE_FIREBASE_*` values are a **public client identifier**, not secrets — access is enforced by [`firestore.rules`](./firestore.rules) and (optionally) App Check. Keep them in `.env.local` (git-ignored) for local dev and in your host's env for production.
 

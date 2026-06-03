@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check'
-import { getAuth } from 'firebase/auth'
+import { browserSessionPersistence, getAuth, setPersistence } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 // Defensive: env values can pick up an invisible BOM / zero-width character or
@@ -47,5 +47,10 @@ if (recaptchaKey) {
 export const firestoreDbId = cleanEnv(import.meta.env.VITE_FIREBASE_FIRESTORE_DB) || ''
 
 export const auth = getAuth(app)
+// Session persistence: the login ends when the browser/tab is closed (does not
+// survive a restart). Combined with the in-app idle timeout, this keeps shared
+// industrial workstations from staying signed in. Non-fatal if it can't be set.
+setPersistence(auth, browserSessionPersistence).catch(() => {})
+
 export const db = firestoreDbId ? getFirestore(app, firestoreDbId) : getFirestore(app)
 export default app
