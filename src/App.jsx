@@ -30,6 +30,8 @@ const Technicians = lazy(() => import('./pages/admin/Technicians'))
 const LockInventory = lazy(() => import('./pages/admin/LockInventory'))
 const Privacy = lazy(() => import('./pages/legal/Privacy'))
 const Terms = lazy(() => import('./pages/legal/Terms'))
+const DataRetention = lazy(() => import('./pages/legal/DataRetention'))
+const Cookies = lazy(() => import('./pages/legal/Cookies'))
 
 // Wraps each route in a subtle enter animation.
 function Page({ children }) {
@@ -171,6 +173,22 @@ export default function App() {
           element={
             <Page>
               <Terms />
+            </Page>
+          }
+        />
+        <Route
+          path="/data-retention"
+          element={
+            <Page>
+              <DataRetention />
+            </Page>
+          }
+        />
+        <Route
+          path="/cookies"
+          element={
+            <Page>
+              <Cookies />
             </Page>
           }
         />

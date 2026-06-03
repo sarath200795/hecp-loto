@@ -8,6 +8,19 @@ import { useAuth } from '../context/AuthContext'
 import { friendlyAuthError } from '../utils/authErrors'
 import { takeSessionExpiredFlag } from '../utils/session'
 
+const MailIcon = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="m3 7 9 6 9-6" />
+  </svg>
+)
+const LockIcon = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <rect x="4" y="11" width="16" height="9" rx="2" />
+    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+  </svg>
+)
+
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -47,14 +60,22 @@ export default function Login() {
   return (
     <AuthShell
       title="Sign in"
-      subtitle="Access your organization's LOTO operations."
+      subtitle="Access your organization's safety portal."
       footer={
-        <>
-          New team member?{' '}
-          <Link to="/signup" className="font-semibold text-amber-600 hover:underline">
-            Join your organization
-          </Link>
-        </>
+        <div className="space-y-1.5">
+          <p>
+            New teammate?{' '}
+            <Link to="/signup" className="font-semibold text-amber-600 hover:underline">
+              Join your organization
+            </Link>
+          </p>
+          <p>
+            Setting up a new company?{' '}
+            <Link to="/register-org" className="font-semibold text-amber-600 hover:underline">
+              Register an organization
+            </Link>
+          </p>
+        </div>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -63,6 +84,7 @@ export default function Login() {
           type="email"
           autoComplete="email"
           required
+          icon={MailIcon}
           value={form.email}
           onChange={update('email')}
           placeholder="you@company.com"
@@ -72,6 +94,7 @@ export default function Login() {
           type="password"
           autoComplete="current-password"
           required
+          icon={LockIcon}
           value={form.password}
           onChange={update('password')}
           placeholder="••••••••"
@@ -82,16 +105,14 @@ export default function Login() {
           </div>
         )}
         <Button type="submit" loading={loading} className="w-full" size="lg">
-          Sign in
+          <span className="inline-flex items-center gap-2">
+            Sign in
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </span>
         </Button>
       </form>
-
-      <div className="mt-6 rounded-lg border border-steel-800 bg-steel-900/40 p-3 text-center text-xs text-steel-400">
-        Setting up a new company?{' '}
-        <Link to="/register-org" className="font-semibold text-steel-200 hover:text-amber-600">
-          Register an organization →
-        </Link>
-      </div>
     </AuthShell>
   )
 }
