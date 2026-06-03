@@ -17,6 +17,10 @@ jobs:
   analyze:
     name: Analyze (JavaScript)
     runs-on: ubuntu-latest
+    # Code scanning (CodeQL upload) requires a public repo or GitHub Advanced
+    # Security. Skip on private repos so the pipeline stays green; this turns on
+    # automatically if the repository is made public or GHAS is enabled.
+    if: ${{ github.event.repository.private == false }}
     steps:
       - uses: actions/checkout@v4
 

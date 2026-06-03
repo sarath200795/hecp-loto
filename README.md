@@ -134,7 +134,7 @@ The deploy/rules workflows **skip cleanly (green) until these secrets exist**, s
 
 - **Authorization** is enforced server-side in [`firestore.rules`](./firestore.rules): per-`orgId` isolation, role/permission gates, immutable `orgId`, write-shape validation, an append-only audit log (`lotoEvents`), and documented public single-doc reads for QR scanning. The UI mirrors these for UX only.
 - **HTTP headers** + CSP are set in `vercel.json`.
-- **Scanning:** CodeQL (source) + Dependabot + `npm audit` (dependencies).
+- **Scanning:** Dependabot + `npm audit` (dependencies) on every repo; **CodeQL** (source) runs automatically on **public** repos or when **GitHub Advanced Security** is enabled — it is skipped on private repos (so CI stays green) and turns on by itself once available.
 - **Optional App Check** (reCAPTCHA v3) gates Firestore/Auth against abuse.
 - Report vulnerabilities per [`SECURITY.md`](./SECURITY.md). Never commit secrets — `.env*.local` and service-account keys are git-ignored.
 
