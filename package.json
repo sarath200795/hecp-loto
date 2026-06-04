@@ -16,15 +16,15 @@
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
-    "firebase": "^10.12.2",
-    "framer-motion": "^11.2.10",
+    "firebase": "^12.14.0",
+    "framer-motion": "^12.40.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
     "qrcode": "^1.5.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "react-hot-toast": "^2.4.1",
-    "react-router-dom": "^6.23.1"
+    "react-router-dom": "^7.16.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
