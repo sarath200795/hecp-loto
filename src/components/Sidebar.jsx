@@ -31,7 +31,7 @@ function NavItem({ to, end, icon, label, onClick }) {
       end={end}
       onClick={onClick}
       className={({ isActive }) =>
-        `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
+        `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors duration-150 ease-out-strong ${
           isActive
             ? 'bg-hazard text-ink shadow-clay'
             : 'text-[#cfc9bf] hover:bg-white/5 hover:text-white'
