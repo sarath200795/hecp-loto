@@ -28,6 +28,7 @@ const Operations = lazy(() => import('./pages/operations/Operations'))
 const OperateProcedure = lazy(() => import('./pages/operations/OperateProcedure'))
 const Technicians = lazy(() => import('./pages/admin/Technicians'))
 const LockInventory = lazy(() => import('./pages/admin/LockInventory'))
+const Sites = lazy(() => import('./pages/admin/Sites'))
 const Privacy = lazy(() => import('./pages/legal/Privacy'))
 const Terms = lazy(() => import('./pages/legal/Terms'))
 const DataRetention = lazy(() => import('./pages/legal/DataRetention'))
@@ -250,6 +251,14 @@ export default function App() {
             element={
               <ProtectedRoute permission={PERMISSIONS.USERS_MANAGE}>
                 <LockInventory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="sites"
+            element={
+              <ProtectedRoute permission={PERMISSIONS.USERS_MANAGE}>
+                <Sites />
               </ProtectedRoute>
             }
           />

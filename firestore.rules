@@ -136,6 +136,19 @@ service cloud.firestore {
         && hasPerm('procedure.delete');
     }
 
+    // Organization sites (locations). Admin-managed; everyone in the org reads.
+    match /sites/{id} {
+      allow read: if isApprovedMember() && resource.data.orgId == me().orgId;
+      allow create: if isApprovedMember()
+        && inMyOrg()
+        && request.resource.data.name is string
+        && ('users.manage' in me().permissions);
+      allow update, delete: if isApprovedMember()
+        && resource.data.orgId == me().orgId
+        && orgUnchanged()
+        && ('users.manage' in me().permissions);
+    }
+
     // Authorized LOTO technicians (name + dedicated lock no.). Admin-managed.
     match /technicians/{id} {
       allow read: if isApprovedMember() && resource.data.orgId == me().orgId;

@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import toast from 'react-hot-toast'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useSites } from '../../hooks/useSites'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import IsolationPointEditor from '../../components/procedures/IsolationPointEditor'
@@ -34,7 +36,8 @@ function blankPoint() {
 export default function CreateProcedure() {
   const { id: editId } = useParams()
   const isRevise = Boolean(editId)
-  const { profile, org } = useAuth()
+  const { profile, org, isAdmin } = useAuth()
+  const { sites } = useSites()
   const navigate = useNavigate()
 
   // Stable procedure id (new or existing) so photo uploads land correctly.
@@ -88,6 +91,14 @@ export default function CreateProcedure() {
     site: form.site,
     equipment: form.equipment,
   })
+
+  // Active org sites for the dropdown; keep the procedure's current site even if
+  // it was a free-text/legacy value or later deactivated, so revisions are safe.
+  const siteOptions = useMemo(() => {
+    const names = sites.filter((s) => s.active !== false).map((s) => s.name)
+    if (form.site && !names.includes(form.site)) names.unshift(form.site)
+    return names
+  }, [sites, form.site])
 
   async function handleSave() {
     if (!form.equipment.trim()) return toast.error('Equipment name is required')
@@ -167,12 +178,34 @@ export default function CreateProcedure() {
           disabled
           className="opacity-70"
         />
-        <Input
-          label="Site"
-          value={form.site}
-          onChange={(e) => setForm((f) => ({ ...f, site: e.target.value }))}
-          placeholder="e.g. Plant 2 — Packaging"
-        />
+        <div className="block">
+          <span className="mb-1.5 block text-sm font-medium text-steel-200">Site</span>
+          {siteOptions.length === 0 ? (
+            <div className="rounded-xl bg-clay px-3.5 py-2.5 text-sm text-steel-400 shadow-clay-inset">
+              No sites yet.{' '}
+              {isAdmin ? (
+                <Link to="/app/sites" className="font-semibold text-amber-600">
+                  Add sites
+                </Link>
+              ) : (
+                'Ask an admin to add sites in Admin → Sites.'
+              )}
+            </div>
+          ) : (
+            <select
+              value={form.site}
+              onChange={(e) => setForm((f) => ({ ...f, site: e.target.value }))}
+              className="w-full rounded-xl bg-clay px-3.5 py-2.5 text-steel-100 shadow-clay-inset outline-none ring-2 ring-transparent transition-all focus:ring-hazard/50"
+            >
+              <option value="">Select a site…</option>
+              {siteOptions.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
         <Input
           label="Equipment"
           value={form.equipment}
