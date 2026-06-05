@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
@@ -69,6 +69,20 @@ export default function Home() {
   const { profile, org, can } = useAuth()
   const navigate = useNavigate()
   const { procedures, loading } = useOrgProcedures()
+  const [siteFilter, setSiteFilter] = useState('')
+
+  // Distinct sites present in the data, for the dashboard filter.
+  const siteList = useMemo(() => {
+    const set = new Set()
+    procedures.forEach((p) => p.site && set.add(p.site))
+    return [...set].sort((a, b) => a.localeCompare(b))
+  }, [procedures])
+
+  // Procedures scoped to the selected site (all sites when none selected).
+  const filtered = useMemo(
+    () => (siteFilter ? procedures.filter((p) => p.site === siteFilter) : procedures),
+    [procedures, siteFilter],
+  )
 
   const m = useMemo(() => {
     const energy = Object.fromEntries(ENERGY_SOURCES.map((e) => [e.key, 0]))
@@ -78,7 +92,7 @@ export default function Home() {
     const lock = { unlocked: 0, partial: 0, locked: 0 }
     let points = 0
     let lockedPoints = 0
-    procedures.forEach((p) => {
+    filtered.forEach((p) => {
       if (status[p.status] != null) status[p.status] += 1
       const ls = p.lockSummary?.status || 'unlocked'
       lock[ls] = (lock[ls] || 0) + 1
@@ -97,7 +111,7 @@ export default function Home() {
     })
     const devicesInUseTotal = Object.values(deviceInUse).reduce((s, v) => s + v, 0)
     return { energy, device, deviceInUse, status, lock, points, lockedPoints, devicesInUseTotal }
-  }, [procedures])
+  }, [filtered])
 
   const energyData = ENERGY_SOURCES.map((e) => ({
     label: e.label.replace(' Energy', ''),
@@ -134,7 +148,7 @@ export default function Home() {
 
   // Equipment currently locked (fully or partially), fully-locked first.
   const rank = (p) => (p.lockSummary?.status === LOCK_STATUS.LOCKED ? 2 : 1)
-  const lockedEquipment = procedures
+  const lockedEquipment = filtered
     .filter((p) => (p.lockSummary?.status || 'unlocked') !== LOCK_STATUS.UNLOCKED)
     .sort((a, b) => rank(b) - rank(a) || (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0))
 
@@ -169,10 +183,39 @@ export default function Home() {
         </div>
       ) : (
         <>
+          {/* Site filter */}
+          {siteList.length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-steel-400">
+                Site
+              </span>
+              <select
+                value={siteFilter}
+                onChange={(e) => setSiteFilter(e.target.value)}
+                className="rounded-xl bg-clay px-3 py-1.5 text-sm text-steel-100 shadow-clay-inset outline-none ring-2 ring-transparent focus:ring-hazard/50"
+              >
+                <option value="">All sites</option>
+                {siteList.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              {siteFilter && (
+                <button
+                  onClick={() => setSiteFilter('')}
+                  className="text-xs font-medium text-amber-600 hover:underline"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Stat cards */}
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <StatCard
-              value={procedures.length}
+              value={filtered.length}
               label="Total Procedures"
               tile="bg-[#1f1c17] text-hazard"
               icon={<HdrIcon d={<><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h8M8 12h8M8 16h5" /></>} />}
@@ -272,7 +315,7 @@ export default function Home() {
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <ChartCard title="Approval Status" subtitle="Procedures by lifecycle status">
                 {statusData.length ? (
-                  <Donut data={statusData} centerTop={procedures.length} centerSub="procedures" />
+                  <Donut data={statusData} centerTop={filtered.length} centerSub="procedures" />
                 ) : (
                   <p className="text-sm text-steel-400">No procedures yet.</p>
                 )}
@@ -282,7 +325,7 @@ export default function Home() {
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
               <ChartCard title="Lock Status" subtitle="Equipment by current lock state">
                 {lockData.length ? (
-                  <Donut data={lockData} centerTop={procedures.length} centerSub="equipment" />
+                  <Donut data={lockData} centerTop={filtered.length} centerSub="equipment" />
                 ) : (
                   <p className="text-sm text-steel-400">No data yet.</p>
                 )}

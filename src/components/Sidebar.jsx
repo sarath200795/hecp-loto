@@ -21,6 +21,7 @@ const ICONS = {
   operate: <Icon d={<><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>} />,
   tech: <Icon d={<><circle cx="12" cy="8" r="4" /><path d="M5 21a7 7 0 0 1 14 0" /></>} />,
   locks: <Icon d={<><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>} />,
+  sites: <Icon d={<><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></>} />,
 }
 
 function NavItem({ to, end, icon, label, onClick }) {
@@ -107,6 +108,7 @@ function SidebarContent({ onNavigate }) {
           <Group title="Admin">
             <NavItem to="/app/approvals" icon={ICONS.approvals} label="Approvals" onClick={onNavigate} />
             <NavItem to="/app/users" icon={ICONS.users} label="Users" onClick={onNavigate} />
+            <NavItem to="/app/sites" icon={ICONS.sites} label="Sites" onClick={onNavigate} />
             <NavItem to="/app/technicians" icon={ICONS.tech} label="Technicians" onClick={onNavigate} />
             <NavItem to="/app/locks" icon={ICONS.locks} label="Lock Inventory" onClick={onNavigate} />
           </Group>
