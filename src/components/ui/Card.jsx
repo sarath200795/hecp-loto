@@ -6,7 +6,7 @@ export default function Card({ children, className = '', animate = true, ...prop
     ? {
         initial: { opacity: 0, y: 12 },
         animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.35, ease: 'easeOut' },
+        transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] },
       }
     : {}
   return (

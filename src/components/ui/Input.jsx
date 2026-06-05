@@ -24,7 +24,7 @@ const Input = forwardRef(function Input(
         <input
           ref={ref}
           type={resolvedType}
-          className={`w-full rounded-xl bg-clay px-3.5 py-2.5 text-steel-100 shadow-clay-inset outline-none ring-2 ring-transparent transition-all duration-200 focus:ring-hazard/50 ${
+          className={`w-full rounded-xl bg-clay px-3.5 py-2.5 text-steel-100 shadow-clay-inset outline-none ring-2 ring-transparent transition-[box-shadow,border-color] duration-200 ease-out-strong focus:ring-hazard/50 ${
             icon ? 'pl-10' : ''
           } ${isPassword ? 'pr-12' : ''} ${error ? 'ring-danger/60' : ''} ${className}`}
           {...props}

@@ -54,6 +54,12 @@ export default {
           'inset 0 4px 10px rgba(150,140,120,0.28), inset 0 -2px 5px rgba(255,255,255,0.85)',
         none: 'none',
       },
+      transitionTimingFunction: {
+        // Stronger custom curves than the built-in CSS easings (Emil Kowalski).
+        'out-strong': 'cubic-bezier(0.23, 1, 0.32, 1)',
+        'in-out-strong': 'cubic-bezier(0.77, 0, 0.175, 1)',
+        drawer: 'cubic-bezier(0.32, 0.72, 0, 1)',
+      },
       keyframes: {
         'fade-in': {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
@@ -61,7 +67,7 @@ export default {
         },
       },
       animation: {
-        'fade-in': 'fade-in 0.4s ease-out both',
+        'fade-in': 'fade-in 0.4s cubic-bezier(0.23, 1, 0.32, 1) both',
       },
     },
   },

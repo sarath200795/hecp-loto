@@ -28,10 +28,10 @@ export default function Button({
   return (
     <motion.button
       type={type}
-      whileHover={isDisabled ? {} : { scale: 1.02 }}
       whileTap={isDisabled ? {} : { scale: 0.97 }}
+      transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
       disabled={isDisabled}
-      className={`inline-flex items-center justify-center gap-2 rounded-2xl font-semibold transition-all active:shadow-clay-inset disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-2xl font-semibold transition-[background-color,box-shadow,color] duration-150 ease-out-strong active:shadow-clay-inset disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       {...props}
     >
       {loading && (
