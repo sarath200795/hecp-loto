@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Sidebar from './components/Sidebar'
 import Footer from './components/Footer'
 import SessionTimeout from './components/SessionTimeout'
+import Assistant from './components/Assistant'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useAuth } from './context/AuthContext'
 import { isFirebaseConfigured } from './firebase/config'
@@ -57,6 +58,7 @@ function AppLayout() {
         <Outlet />
         <Footer />
       </main>
+      <Assistant />
     </div>
   )
 }

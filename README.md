@@ -66,6 +66,8 @@ VITE_SESSION_IDLE_MINUTES=30
 VITE_SESSION_WARN_SECONDS=60
 ```
 
+**Safety Bot ("Sam"):** a floating assistant (bottom-left) answers questions about your live LOTO data — procedures, lock status, pending approvals, sites, technicians, lock inventory, recent activity — and gives OSHA 29 CFR 1910.147-based guidance. It works fully offline via a rule engine (`src/lib/assistant.js`); set the **server-side** `GEMINI_API_KEY` (Vercel env) to enable the free-form AI fallback (`api/assistant.js`). The key is never shipped to the browser.
+
 **Sessions:** login uses Firebase **session persistence** (closing the browser ends the session) plus an **idle timeout** — after `VITE_SESSION_IDLE_MINUTES` of inactivity a warning modal counts down, then the user is signed out and returned to the login screen with a notice.
 
 > The `VITE_FIREBASE_*` values are a **public client identifier**, not secrets — access is enforced by [`firestore.rules`](./firestore.rules) and (optionally) App Check. Keep them in `.env.local` (git-ignored) for local dev and in your host's env for production.
