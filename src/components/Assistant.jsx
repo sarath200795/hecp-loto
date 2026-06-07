@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, lazy, Suspense, Component } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion, useMotionValue, animate } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
@@ -8,6 +8,17 @@ import { useTechnicians } from '../hooks/useTechnicians'
 import { useLocks } from '../hooks/useLocks'
 import { LOCK_STATUS } from '../constants/procedures'
 import { pageGuide, suggestedQuestions, answer, askAI, buildAIContext } from '../lib/assistant'
+
+// The 3D mascot is heavy (three.js) — load it only when needed.
+const Character3D = lazy(() => import('./Character3D'))
+
+// Falls back to the 2D SVG Sam if WebGL / three fails to load.
+class AvatarBoundary extends Component {
+  constructor(props) { super(props); this.state = { failed: false } }
+  static getDerivedStateFromError() { return { failed: true } }
+  componentDidCatch() { /* swallow — fallback handles it */ }
+  render() { return this.state.failed ? this.props.fallback : this.props.children }
+}
 
 // ── Inline icons (HECP convention; avoids a lucide-react dependency) ─────────
 const Ico = ({ d, size = 16 }) => (
@@ -199,6 +210,7 @@ export default function Assistant() {
   const my = useMotionValue(savedPos?.y ?? 0)
   const lastRef = useRef(Date.now())
   const asleepRef = useRef(false)
+  const greetedRef = useRef(false)
   useEffect(() => { asleepRef.current = asleep }, [asleep])
 
   const guide = useMemo(() => pageGuide(location.pathname), [location.pathname])
@@ -259,17 +271,15 @@ export default function Assistant() {
     return () => { alive = false; clearTimeout(t); if (anim?.stop) anim.stop() }
   }, [enabled, asleep, open, tip, writingPage, reduced, pinned, mx, my])
 
-  // Greeting (once per session) → then per-page tips.
+  // Greeting (once per page load) → then per-page tips.
   useEffect(() => {
     if (!enabled || open) return undefined
-    const greetKey = `hecp:bot:greeted:${uid}`
-    const greeted = (() => { try { return sessionStorage.getItem(greetKey) === '1' } catch { return false } })()
-    if (!greeted) {
+    if (!greetedRef.current) {
+      greetedRef.current = true
       const t = setTimeout(() => {
-        setTip({ greeting: true, title: "Hi, I'm Sam 👷", text: 'Tap me anytime to ask about your procedures, locks and approvals.' })
-        try { sessionStorage.setItem(greetKey, '1') } catch { /* ignore */ }
+        setTip({ greeting: true, title: "Hi, I'm Sam 👷", text: 'Tap me anytime to ask about your procedures, locks, approvals and sites.' })
       }, 1200)
-      const t2 = setTimeout(() => setTip((cur) => (cur?.greeting ? null : cur)), 8000)
+      const t2 = setTimeout(() => setTip((cur) => (cur?.greeting ? null : cur)), 9000)
       return () => { clearTimeout(t); clearTimeout(t2) }
     }
     const seenKey = `hecp:bot:tip:${uid}:${guide.title}`
@@ -351,9 +361,17 @@ export default function Assistant() {
         onDragEnd={onDragEnd}
       >
         <button onClick={() => (open ? setOpen(false) : openPanel())} className="relative block" aria-label="Open Safety Bot">
-          <div style={{ transform: `scaleX(${facing})` }}>
-            <Character mode={shownMode} reduced={reduced} />
-          </div>
+          {reduced ? (
+            <div style={{ transform: `scaleX(${facing})` }}>
+              <Character mode={shownMode} reduced />
+            </div>
+          ) : (
+            <AvatarBoundary fallback={<div style={{ transform: `scaleX(${facing})` }}><Character mode={shownMode} reduced /></div>}>
+              <Suspense fallback={<div style={{ transform: `scaleX(${facing})` }}><Character mode={shownMode} reduced /></div>}>
+                <Character3D mode={shownMode} size={68} facing={facing} />
+              </Suspense>
+            </AvatarBoundary>
+          )}
           {attention > 0 && (
             <span className="absolute right-0 top-2 grid h-5 min-w-5 place-items-center rounded-full bg-danger px-1 text-[10px] font-extrabold text-white ring-2 ring-claySurface">{attention}</span>
           )}

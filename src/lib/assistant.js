@@ -6,9 +6,10 @@
 // activity log. Falls back to a server-side AI proxy (askAI) only when no rule
 // matches. All guidance is tailored to Lockout/Tagout and cites OSHA 1910.147.
 // ─────────────────────────────────────────────────────────────────────────────
-import { PROCEDURE_STATUS, LOCK_STATUS } from '../constants/procedures'
-import { collectInUseLockNos } from '../utils/lockout'
+import { LOCK_STATUS } from '../constants/procedures'
+import { collectInUseLockNos, lockoutDeviceTally } from '../utils/lockout'
 import { numberIsolationPoints } from '../utils/codes'
+import { pointDeviceKeys, deviceLabel } from '../constants/energySources'
 
 const OSHA =
   'See OSHA 29 CFR 1910.147: https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.147.'
@@ -82,7 +83,7 @@ const PAGE_QS = {
   dashboard: ['What needs my attention?', 'How many pending approval?', 'Which site has the most procedures?'],
   register: ["What's partially locked?", "What still needs locking?", "What's fully locked?"],
   operations: ['How do I lock out equipment?', 'What is a group lock?'],
-  inventory: ['How many approved procedures?', 'How many drafts?'],
+  inventory: ['How many approved procedures?', 'What lockout devices are used?', 'How many drafts?'],
   create: ['What goes in an isolation point?', 'When can a procedure be performed?'],
   locks: ['How many locks are available?', 'Which locks are in use?'],
   technicians: ['How many technicians?'],
@@ -127,6 +128,8 @@ export function buildStats({ procedures = [], sites = [], technicians = [], lock
   let lockedPoints = 0
   let groupActive = 0
   const bySite = {}
+  const deviceDefined = {} // device key → # isolation points using it
+  const deviceInUse = {} // device key → # currently applied (incl. group hardware)
   procedures.forEach((p) => {
     if (status[p.status] != null) status[p.status] += 1
     const ls = p.lockSummary?.status || LOCK_STATUS.UNLOCKED
@@ -136,6 +139,10 @@ export function buildStats({ procedures = [], sites = [], technicians = [], lock
     if (p.groupLock?.active) groupActive += 1
     const s = p.site || 'Unspecified'
     bySite[s] = (bySite[s] || 0) + 1
+    ;(p.isolationPoints || []).forEach((pt) => {
+      pointDeviceKeys(pt).forEach((k) => { deviceDefined[k] = (deviceDefined[k] || 0) + 1 })
+    })
+    Object.entries(lockoutDeviceTally(p)).forEach(([k, v]) => { deviceInUse[k] = (deviceInUse[k] || 0) + v })
   })
   const inUse = collectInUseLockNos(procedures)
   const deptLocks = locks.filter((l) => l.type === 'department')
@@ -151,6 +158,7 @@ export function buildStats({ procedures = [], sites = [], technicians = [], lock
     sites: sites.map((s) => s.name).filter(Boolean),
     technicians: technicians.length,
     locks: { total: locks.length, department: deptLocks.length, availableDept, inUse: inUse.size },
+    devices: { defined: deviceDefined, inUse: deviceInUse },
   }
 }
 
@@ -297,6 +305,18 @@ export function answer(question, ctx) {
       run: () => `Lock inventory: ${stats.locks.department} department lock(s), ${stats.locks.availableDept} available, ${stats.locks.inUse} currently in use.`,
     },
     {
+      // LOTO device types (padlock, hasp, valve lock, …) defined and in use
+      keywords: ['device', 'lockout device', 'loto device', 'hardware', 'padlock', 'hasp', 'valve lock', 'cable lockout', 'plug cover', 'pin in', 'pin out', 'flange', 'type of device', 'what device', 'which device'],
+      run: () => {
+        const def = Object.entries(stats.devices.defined).sort((a, b) => b[1] - a[1])
+        if (!def.length) return 'No LOTO devices recorded yet — add isolation points (each with a device) to a procedure.'
+        const used = Object.entries(stats.devices.inUse).sort((a, b) => b[1] - a[1])
+        const defStr = def.map(([k, n]) => `${deviceLabel(k)} (${n})`).join(', ')
+        const usedStr = used.length ? used.map(([k, n]) => `${deviceLabel(k)} ×${n}`).join(', ') : 'none currently applied'
+        return `LOTO devices defined across procedures: ${defStr}. Currently in use: ${usedStr} (incl. group-lock hardware).`
+      },
+    },
+    {
       keywords: ['isolation point', 'how many point', 'energy point'],
       run: () => `${stats.points} isolation point(s) across ${stats.total} procedure(s); ${stats.lockedPoints} currently locked.`,
     },
@@ -372,6 +392,10 @@ export function buildAIContext(ctx) {
     siteBreakdown: stats.siteBreakdown.slice(0, 8).map(([site, count]) => ({ site, count })),
     technicians: stats.technicians,
     lockInventory: stats.locks,
+    devices: {
+      defined: Object.fromEntries(Object.entries(stats.devices.defined).map(([k, v]) => [deviceLabel(k), v])),
+      inUse: Object.fromEntries(Object.entries(stats.devices.inUse).map(([k, v]) => [deviceLabel(k), v])),
+    },
     equipment,
     recentActivity,
   }
