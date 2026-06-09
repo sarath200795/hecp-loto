@@ -13,7 +13,7 @@ export default function Footer() {
           personnel.
         </p>
         <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-          <span>© {year} HECP LOTO</span>
+          <span>© {year} WE EHS</span>
           <span aria-hidden>·</span>
           <Link to="/privacy" className="hover:text-amber-600">
             Privacy Policy

@@ -117,7 +117,7 @@ export default function AuthShell({ title, subtitle, children, footer }) {
               </Link>
             ))}
           </nav>
-          <div>© 2026 HECP LOTO · Lockout / Tagout platform</div>
+          <div>© 2026 WE EHS · HECP LOTO platform</div>
         </div>
       </div>
 
