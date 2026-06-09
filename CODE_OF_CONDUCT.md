@@ -24,7 +24,7 @@ be considered inappropriate in a professional setting.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the maintainers at **[conduct@your-company-domain]**. All complaints
+reported to the maintainers at **sarath200795@gmail.com** (WE EHS). All complaints
 will be reviewed and investigated promptly and fairly. Maintainers may remove,
 edit, or reject contributions, and may temporarily or permanently ban any
 contributor for behaviors they deem inappropriate.

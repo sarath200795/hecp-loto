@@ -2,12 +2,12 @@ import LegalLayout, { H2 } from './LegalLayout'
 
 export default function Privacy() {
   return (
-    <LegalLayout title="Privacy Policy" updated="2026-06-03">
+    <LegalLayout title="Privacy Policy" updated="9 June 2026">
       <p>
-        This policy explains how HECP LOTO ("the Service") collects, uses, and protects personal
-        data. Operators deploying this Service should complete the bracketed details (legal entity,
-        contact, jurisdiction) and may act as data controller and/or processor for their
-        organization's data.
+        This policy explains how HECP LOTO ("the Service"), operated by <strong>WE EHS</strong>{' '}
+        (India), collects, uses, and protects personal data. WE EHS may act as a data controller
+        and/or processor for your organization's data. Contact:{' '}
+        <a href="mailto:sarath200795@gmail.com" className="font-semibold text-amber-600">sarath200795@gmail.com</a>.
       </p>
 
       <H2>Data we collect</H2>
@@ -48,8 +48,8 @@ export default function Privacy() {
         Subject to applicable law (GDPR/UK GDPR/CCPA and similar), you may request access,
         correction, deletion, restriction, portability, or objection, and opt out of any "sale" of
         personal data (we do not sell personal data). Audit-log entries may be exempt from deletion
-        where retention is legally required. Contact your administrator or the operator's privacy
-        contact to exercise these rights.
+        where retention is legally required. To exercise these rights, contact your administrator
+        or WE EHS at sarath200795@gmail.com.
       </p>
 
       <H2>Security & cookies</H2>
