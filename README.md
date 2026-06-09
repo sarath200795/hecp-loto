@@ -151,7 +151,7 @@ The deploy/rules workflows **skip cleanly (green) until these secrets exist**, s
 - **License:** [MIT](./LICENSE).
 - **Privacy / Terms / Disclaimer:** [`PRIVACY.md`](./PRIVACY.md), [`TERMS.md`](./TERMS.md), [`DISCLAIMER.md`](./DISCLAIMER.md) — also available in-app at `/privacy` and `/terms`, with a required consent checkbox at sign-up.
 - **Safety:** HECP LOTO assists with LOTO documentation; it **does not verify physical energy isolation** and is **not a substitute** for a compliant energy-control program or qualified personnel (e.g. OSHA 29 CFR 1910.147). See the disclaimer.
-- Replace the bracketed placeholders (company legal name, contact emails, governing jurisdiction) in the legal docs before production use.
+- **Operator:** WE EHS (India) · contact **sarath200795@gmail.com** · governed by the laws of India.
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the contributor workflow.
 

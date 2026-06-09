@@ -2,7 +2,7 @@ import LegalLayout, { H2 } from './LegalLayout'
 
 export default function DataRetention() {
   return (
-    <LegalLayout title="Data Retention" updated="2026-06-03">
+    <LegalLayout title="Data Retention" updated="9 June 2026">
       <p>
         This policy describes how long HECP LOTO ("the Service") keeps data and how deletion works.
         Operators should align the periods below with their own record-keeping obligations.

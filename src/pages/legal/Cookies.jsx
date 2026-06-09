@@ -2,7 +2,7 @@ import LegalLayout, { H2 } from './LegalLayout'
 
 export default function Cookies() {
   return (
-    <LegalLayout title="Cookies & Storage" updated="2026-06-03">
+    <LegalLayout title="Cookies & Storage" updated="9 June 2026">
       <p>
         HECP LOTO ("the Service") does <strong>not</strong> use advertising or third-party tracking
         cookies, and we do not sell or share data for advertising. The app uses a small amount of

@@ -3,9 +3,10 @@ import LegalLayout, { H2 } from './LegalLayout'
 
 export default function Terms() {
   return (
-    <LegalLayout title="Terms of Service" updated="2026-06-03">
+    <LegalLayout title="Terms of Service" updated="9 June 2026">
       <p>
-        By creating an account or using HECP LOTO ("the Service") you agree to these Terms, the{' '}
+        By creating an account or using HECP LOTO ("the Service"), operated by{' '}
+        <strong>WE EHS</strong>, you agree to these Terms, the{' '}
         <Link to="/privacy" className="font-semibold text-amber-600">
           Privacy Policy
         </Link>
@@ -47,7 +48,7 @@ export default function Terms() {
       <p>
         Access may be suspended or terminated for breach of these Terms; audit records may be
         retained as required for safety/legal compliance. These Terms are governed by the laws of
-        the operator's stated jurisdiction.
+        India. Contact WE EHS at sarath200795@gmail.com.
       </p>
 
       <p className="text-steel-400">

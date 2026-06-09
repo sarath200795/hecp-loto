@@ -1,11 +1,11 @@
 # Terms of Service
 
-_Last updated: 2026-06-03_
+_Last updated: 9 June 2026_
 
-These Terms govern use of **HECP LOTO** ("the Service"). By creating an account
-or using the Service you agree to these Terms, the [Privacy Policy](./PRIVACY.md),
-and the [Safety & Liability Disclaimer](./DISCLAIMER.md). **Operator note:**
-replace bracketed placeholders before production use.
+These Terms govern use of **HECP LOTO**, operated by **WE EHS** ("the Service").
+By creating an account or using the Service you agree to these Terms, the
+[Privacy Policy](./PRIVACY.md), and the
+[Safety & Liability Disclaimer](./DISCLAIMER.md).
 
 ## 1. Accounts & organizations
 
@@ -60,9 +60,9 @@ be retained as required for safety/legal compliance.
 
 ## 9. Governing law
 
-These Terms are governed by the laws of [governing jurisdiction], without regard
-to conflict-of-laws rules.
+These Terms are governed by the laws of **India**, without regard to
+conflict-of-laws rules.
 
 ## 10. Contact
 
-[legal@your-company-domain].
+WE EHS — sarath200795@gmail.com.

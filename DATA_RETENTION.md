@@ -1,6 +1,6 @@
 # Data Retention Policy
 
-_Last updated: 2026-06-03_
+_Last updated: 9 June 2026_
 
 This policy describes how long HECP LOTO retains data and how deletion works.
 **Operator note:** adjust the periods below to match your organization's
@@ -22,7 +22,7 @@ record-keeping obligations and replace the bracketed contact.
 
 - Authorized users can delete procedures and photos in-app; deletion removes the
   main document and its photo document.
-- Account/organization deletion requests: contact **[privacy@your-company-domain]**.
+- Account/organization deletion requests: contact **sarath200795@gmail.com** (WE EHS).
 - **Audit-log exemption:** entries in the append-only activity log may be exempt
   from deletion where retention is required for workplace-safety compliance.
 

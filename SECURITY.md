@@ -18,7 +18,7 @@ Report privately via one of:
 
 - GitHub's **[Private vulnerability reporting](https://github.com/sarath200795/hecp-loto/security/advisories/new)**
   (Security tab → Report a vulnerability), or
-- Email **security@<your-company-domain>** with details and reproduction steps.
+- Email **sarath200795@gmail.com** (WE EHS) with details and reproduction steps.
 
 Please include:
 

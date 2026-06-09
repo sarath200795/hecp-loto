@@ -1,6 +1,6 @@
 # Cookies & Storage
 
-_Last updated: 2026-06-03_
+_Last updated: 9 June 2026_
 
 HECP LOTO does **not** use advertising or third-party tracking cookies, and we
 do not sell or share data for advertising. The app uses a small amount of
@@ -31,4 +31,4 @@ You can clear this data at any time via your browser settings
 out and resets the inactivity timer. Disabling storage entirely will prevent
 sign-in.
 
-Questions: **[privacy@your-company-domain]**.
+Questions: **sarath200795@gmail.com** (WE EHS).

@@ -1,17 +1,15 @@
 # Privacy Policy
 
-_Last updated: 2026-06-03_
+_Last updated: 9 June 2026_
 
-This Privacy Policy explains how **HECP LOTO** ("the Service", "we") collects,
-uses, and protects personal data. **Operator note:** replace the bracketed
-placeholders (legal entity, contact email, governing jurisdiction) before
-production use. Depending on your deployment you may be a **data controller**
-and/or **processor** for your organization's data.
+This Privacy Policy explains how **WE EHS** ("the Service", "we") collects,
+uses, and protects personal data. Depending on your deployment, WE EHS may act
+as a **data controller** and/or **processor** for your organization's data.
 
 ## 1. Who we are
 
-- **Data controller:** [Your Company Legal Name], [address].
-- **Contact / DPO:** [privacy@your-company-domain].
+- **Data controller:** WE EHS, India.
+- **Contact / DPO:** sarath200795@gmail.com.
 
 ## 2. Data we collect
 
@@ -58,7 +56,7 @@ Subject to applicable law (GDPR/UK GDPR/CCPA and similar), you may request
 **access, correction, deletion, restriction, portability, or objection**, and
 (CCPA) to know/delete and opt out of "sale" (we do not sell personal data).
 Audit-log entries may be exempt from deletion where retention is legally
-required. To exercise rights, contact [privacy@your-company-domain]. You may
+required. To exercise rights, contact sarath200795@gmail.com. You may
 also lodge a complaint with your supervisory authority.
 
 ## 7. Security
