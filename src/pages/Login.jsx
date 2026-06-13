@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import AuthShell from '../components/AuthShell'
 import Input from '../components/ui/Input'
@@ -24,6 +24,11 @@ const LockIcon = (
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  // Honor a `next` target only for a LOTO operation (e.g. from a scanned QR
+  // code); any other login lands on the dashboard.
+  const nextParam = params.get('next')
+  const dest = /^\/app\/operations\/[A-Za-z0-9_-]+$/.test(nextParam || '') ? nextParam : '/app'
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -46,8 +51,8 @@ export default function Login() {
     try {
       await login(form.email, form.password)
       toast.success('Welcome back')
-      // Always land on the dashboard after signing in.
-      navigate('/app', { replace: true })
+      // QR-scan sign-ins go to that equipment's LOTO Operations; else dashboard.
+      navigate(dest, { replace: true })
     } catch (err) {
       setError(friendlyAuthError(err))
     } finally {

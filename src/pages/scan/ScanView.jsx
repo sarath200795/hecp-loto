@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTechnicians } from '../../hooks/useTechnicians'
 import { useLocks } from '../../hooks/useLocks'
@@ -15,7 +15,6 @@ import { getProcedurePhotos, subscribeProcedure } from '../../services/procedure
 
 export default function ScanView() {
   const { id } = useParams()
-  const location = useLocation()
   const { firebaseUser, profile, can } = useAuth()
   const { technicians } = useTechnicians()
   const { locks } = useLocks()
@@ -77,7 +76,7 @@ export default function ScanView() {
               Open app →
             </Link>
           ) : (
-            <Link to="/login" className="text-sm text-steel-300 hover:text-amber-600">
+            <Link to={`/login?next=/app/operations/${id}`} className="text-sm text-steel-300 hover:text-amber-600">
               Sign in
             </Link>
           )}
@@ -93,8 +92,7 @@ export default function ScanView() {
               actions and lock out isolation points.
             </div>
             <Link
-              to="/login"
-              state={{ from: location }}
+              to={`/login?next=/app/operations/${id}`}
               className="rounded-lg bg-hazard px-4 py-2 text-sm font-semibold text-ink hover:bg-hazard-dark"
             >
               Sign in to perform
