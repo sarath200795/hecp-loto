@@ -164,6 +164,7 @@ export default function Character3D({ mode = 'idle', size = 68, facing = 1, fall
   // restored. (Three.js already calls preventDefault internally, so the
   // browser attempts to restore the context on its own.)
   const [lost, setLost] = useState(false)
+  const [canvasEl, setCanvasEl] = useState(null)
 
   useEffect(() => {
     const onVis = () => setFrameloop(document.hidden ? 'never' : 'always')
@@ -171,11 +172,21 @@ export default function Character3D({ mode = 'idle', size = 68, facing = 1, fall
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [])
 
-  const handleCreated = ({ gl }) => {
-    const canvas = gl.domElement
-    canvas.addEventListener('webglcontextlost', () => setLost(true), false)
-    canvas.addEventListener('webglcontextrestored', () => setLost(false), false)
-  }
+  // Attach the context-loss listeners on the canvas once it exists, with
+  // cleanup so they can't accumulate across remounts (StrictMode, re-init).
+  useEffect(() => {
+    if (!canvasEl) return undefined
+    const onLost = () => setLost(true)
+    const onRestored = () => setLost(false)
+    canvasEl.addEventListener('webglcontextlost', onLost, false)
+    canvasEl.addEventListener('webglcontextrestored', onRestored, false)
+    return () => {
+      canvasEl.removeEventListener('webglcontextlost', onLost, false)
+      canvasEl.removeEventListener('webglcontextrestored', onRestored, false)
+    }
+  }, [canvasEl])
+
+  const handleCreated = ({ gl }) => setCanvasEl(gl.domElement)
 
   return (
     <div style={{ width: w, height: h, pointerEvents: 'none', position: 'relative' }}>
