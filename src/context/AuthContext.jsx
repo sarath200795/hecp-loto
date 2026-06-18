@@ -133,6 +133,13 @@ export function AuthProvider({ children }) {
 
   async function login(email, password) {
     const cred = await signInWithEmailAndPassword(auth, email.trim(), password)
+    // Pre-arm the loading state the moment sign-in succeeds. Without this there
+    // is a brief window where context still holds `loading: false` / no user
+    // (onAuthStateChanged hasn't fired yet), so a navigate('/app') would bounce
+    // off ProtectedRoute back to /login and ping-pong until auth settles. Now
+    // the guards show a loader during that window instead.
+    setLoading(true)
+    setProfileStatus('loading')
     // Fresh session: clear any stale "expired" flag and start the idle clock.
     clearSessionExpiredFlag()
     logActivity()
