@@ -6,7 +6,6 @@ import Footer from './components/Footer'
 import SessionTimeout from './components/SessionTimeout'
 import Assistant from './components/Assistant'
 import ProtectedRoute from './components/ProtectedRoute'
-import NavigationLoopMonitor from './components/NavigationLoopMonitor'
 import { useAuth } from './context/AuthContext'
 import { isFirebaseConfigured } from './firebase/config'
 import { PERMISSIONS, USER_STATUS } from './constants/roles'
@@ -105,8 +104,6 @@ export default function App() {
 
   return (
     <Suspense fallback={<FullScreenLoader label="Loading…" />}>
-    {/* Logs the offending route cycle if a redirect loop is ever detected. */}
-    <NavigationLoopMonitor />
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route
