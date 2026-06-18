@@ -48,6 +48,12 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null) // Firestore users/{uid} doc
   const [org, setOrg] = useState(null)
   const [loading, setLoading] = useState(true) // auth-state resolution only
+  // True once Firebase has reported the auth state at least once. Unlike
+  // `loading` (which re-toggles while the profile listener (re)subscribes),
+  // this latches to true and never flips back — so route guards can rely on it
+  // to avoid redirecting on a transient, mid-resolution state (which is what
+  // lets pages like /pending and /login bounce off each other).
+  const [authReady, setAuthReady] = useState(false)
   // 'loading' | 'ready' | 'missing' | 'error' — resolution of the profile doc.
   const [profileStatus, setProfileStatus] = useState('loading')
   const [profileError, setProfileError] = useState(null)
@@ -56,6 +62,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
       setFirebaseUser(u)
+      setAuthReady(true)
       if (!u) {
         setProfile(null)
         setOrg(null)
@@ -356,6 +363,7 @@ export function AuthProvider({ children }) {
       profileError,
       org,
       loading,
+      authReady,
       isAdmin,
       isApproved,
       can,
@@ -371,7 +379,7 @@ export function AuthProvider({ children }) {
       findOrgByJoinCode,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [firebaseUser, profile, profileStatus, profileError, org, loading],
+    [firebaseUser, profile, profileStatus, profileError, org, loading, authReady],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

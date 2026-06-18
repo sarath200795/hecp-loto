@@ -8,10 +8,13 @@ import { FullScreenLoader } from './ui/Spinner'
  * required permission. Redirects appropriately when checks fail.
  */
 export default function ProtectedRoute({ children, permission, adminOnly = false }) {
-  const { firebaseUser, profile, profileStatus, loading, can, isAdmin } = useAuth()
+  const { firebaseUser, profile, profileStatus, loading, authReady, can, isAdmin } = useAuth()
   const location = useLocation()
 
-  if (loading || profileStatus === 'loading') {
+  // Never decide a redirect until Firebase has resolved the auth state at least
+  // once and the profile listener has settled — otherwise a transient
+  // mid-resolution read can bounce the user between guarded routes.
+  if (!authReady || loading || profileStatus === 'loading') {
     return <FullScreenLoader label="Verifying access…" />
   }
 

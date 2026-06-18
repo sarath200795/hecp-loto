@@ -16,6 +16,7 @@ export default function AccountIssue() {
     firebaseUser,
     profileStatus,
     profileError,
+    authReady,
     logout,
     completeOrgRegistration,
     completeJoin,
@@ -42,8 +43,9 @@ export default function AccountIssue() {
     }
   }, [listOrganizations])
 
-  // Not signed in → nothing to recover; go to login.
-  if (!firebaseUser && profileStatus !== 'loading') {
+  // Not signed in → nothing to recover; go to login. Wait until auth has
+  // resolved so a transient pre-resolution read can't bounce us to /login.
+  if (authReady && !firebaseUser && profileStatus !== 'loading') {
     return <Navigate to="/login" replace />
   }
 
