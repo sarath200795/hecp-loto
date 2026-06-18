@@ -13,6 +13,7 @@ import { FullScreenLoader } from './components/ui/Spinner'
 
 // Lazy-loaded route chunks — show the lock-on-MCB loader while they load.
 const Login = lazy(() => import('./pages/Login'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const Signup = lazy(() => import('./pages/Signup'))
 const RegisterOrg = lazy(() => import('./pages/RegisterOrg'))
 const PendingApproval = lazy(() => import('./pages/PendingApproval'))
@@ -111,6 +112,16 @@ export default function App() {
             <PublicOnly>
               <Page>
                 <Login />
+              </Page>
+            </PublicOnly>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicOnly>
+              <Page>
+                <ForgotPassword />
               </Page>
             </PublicOnly>
           }

@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   deleteUser,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -140,6 +141,11 @@ export function AuthProvider({ children }) {
 
   function logout() {
     return signOut(auth)
+  }
+
+  /** Send a password-reset email to the given address. */
+  function resetPassword(email) {
+    return sendPasswordResetEmail(auth, email.trim())
   }
 
   /** List all organizations (id + name) for the join dropdown. */
@@ -349,6 +355,7 @@ export function AuthProvider({ children }) {
       PERMISSIONS,
       login,
       logout,
+      resetPassword,
       registerOrganization,
       signupMember,
       completeOrgRegistration,

@@ -102,6 +102,14 @@ export default function Login() {
           onChange={update('password')}
           placeholder="••••••••"
         />
+        <div className="-mt-1 text-right">
+          <Link
+            to="/forgot-password"
+            className="text-sm font-semibold text-amber-600 hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
         {error && (
           <div className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
             {error}
