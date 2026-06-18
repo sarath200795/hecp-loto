@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unknown-property -- react-three-fiber uses three.js props (args, position, intensity, …) */
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 
 // Flat-cartoon "Sam" — a friendly site safety manager: yellow hard hat, white
@@ -151,12 +151,71 @@ function Rig({ mode = 'idle', facing = 1 }) {
   )
 }
 
-export default function Character3D({ mode = 'idle', size = 68, facing = 1 }) {
+export default function Character3D({ mode = 'idle', size = 68, facing = 1, fallback = null }) {
   const w = size
   const h = Math.round(size * 1.35)
+  const glRef = useRef(null)
+  // Pause the GPU render loop while the tab is hidden — there's no point
+  // animating an offscreen canvas, and backgrounded contexts are the most
+  // likely to be dropped by the browser (the "Context Lost" warning).
+  const [frameloop, setFrameloop] = useState(
+    typeof document !== 'undefined' && document.hidden ? 'never' : 'always',
+  )
+  // Show the 2D fallback if the WebGL context is lost until it's restored.
+  const [lost, setLost] = useState(false)
+
+  useEffect(() => {
+    const onVis = () => setFrameloop(document.hidden ? 'never' : 'always')
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
+
+  // Free the WebGL context on unmount so contexts don't accumulate across
+  // mounts (re-entering /app) and force the browser to drop older ones.
+  useEffect(
+    () => () => {
+      const gl = glRef.current
+      if (!gl) return
+      try {
+        gl.forceContextLoss()
+      } catch {
+        /* ignore */
+      }
+      try {
+        gl.dispose()
+      } catch {
+        /* ignore */
+      }
+    },
+    [],
+  )
+
+  const handleCreated = ({ gl }) => {
+    glRef.current = gl
+    const canvas = gl.domElement
+    canvas.addEventListener(
+      'webglcontextlost',
+      (e) => {
+        // Allow the browser to restore the context instead of tearing it down
+        // permanently (the default), which is what logs "Context Lost".
+        e.preventDefault()
+        setLost(true)
+      },
+      false,
+    )
+    canvas.addEventListener('webglcontextrestored', () => setLost(false), false)
+  }
+
   return (
-    <div style={{ width: w, height: h, pointerEvents: 'none' }}>
-      <Canvas dpr={[1, 2]} gl={{ alpha: true, antialias: true }} camera={{ position: [0, 0, 6.6], fov: 30 }} style={{ background: 'transparent' }}>
+    <div style={{ width: w, height: h, pointerEvents: 'none', position: 'relative' }}>
+      <Canvas
+        frameloop={frameloop}
+        dpr={[1, 1.5]}
+        gl={{ alpha: true, antialias: true, powerPreference: 'low-power', failIfMajorPerformanceCaveat: false }}
+        camera={{ position: [0, 0, 6.6], fov: 30 }}
+        style={{ background: 'transparent' }}
+        onCreated={handleCreated}
+      >
         <ambientLight intensity={0.85} />
         <directionalLight position={[3, 5, 4]} intensity={1.05} />
         <directionalLight position={[-3, 2, -2]} intensity={0.3} />
@@ -164,6 +223,9 @@ export default function Character3D({ mode = 'idle', size = 68, facing = 1 }) {
           <Rig mode={mode} facing={facing} />
         </group>
       </Canvas>
+      {lost && fallback ? (
+        <div style={{ position: 'absolute', inset: 0 }}>{fallback}</div>
+      ) : null}
     </div>
   )
 }
