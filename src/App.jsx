@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Sidebar from './components/Sidebar'
@@ -7,6 +7,7 @@ import SessionTimeout from './components/SessionTimeout'
 import Assistant from './components/Assistant'
 import ProtectedRoute from './components/ProtectedRoute'
 import NavigationLoopMonitor from './components/NavigationLoopMonitor'
+import NavLoopRecovery from './components/NavLoopRecovery'
 import { useAuth } from './context/AuthContext'
 import { isFirebaseConfigured } from './firebase/config'
 import { PERMISSIONS, USER_STATUS } from './constants/roles'
@@ -100,12 +101,18 @@ function ConfigMissing() {
 
 export default function App() {
   const location = useLocation()
+  // When the monitor trips, we swap <Routes> for a recovery screen, which
+  // unmounts the looping routes and hard-stops the redirect cycle.
+  const [loop, setLoop] = useState(null)
 
   if (!isFirebaseConfigured) return <ConfigMissing />
 
   return (
     <Suspense fallback={<FullScreenLoader label="Loading…" />}>
-    <NavigationLoopMonitor />
+    <NavigationLoopMonitor onDetected={(routes) => setLoop(routes)} />
+    {loop ? (
+      <NavLoopRecovery routes={loop} />
+    ) : (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route
@@ -324,6 +331,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/app" replace />} />
       </Routes>
     </AnimatePresence>
+    )}
     </Suspense>
   )
 }

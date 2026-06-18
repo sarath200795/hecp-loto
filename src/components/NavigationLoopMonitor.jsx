@@ -1,14 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 
-// Diagnostic: detects a redirect/navigation loop (the cause of Chrome's
-// "Throttling navigation to prevent the browser from hanging" warning) and
-// logs the offending route cycle, which the browser warning itself never
-// reveals. Purely observational — it never navigates or changes app state.
+// Detects a redirect/navigation loop — the cause of Chrome's "Throttling
+// navigation to prevent the browser from hanging" warning — and (a) logs the
+// offending route cycle, which the browser warning never reveals, and (b)
+// signals the app to break the loop via onDetected. Purely observational; it
+// never navigates or mutates routing itself.
 const WINDOW_MS = 2000
 const THRESHOLD = 25
 
-export default function NavigationLoopMonitor() {
+export default function NavigationLoopMonitor({ onDetected }) {
   const location = useLocation()
   const historyRef = useRef([])
   const reportedRef = useRef(false)
@@ -28,12 +29,13 @@ export default function NavigationLoopMonitor() {
             `Recent route sequence (newest last):\n  ${recent.join('\n  → ')}\n` +
             'This is what trips Chrome’s navigation-throttling guard. Share this list to pinpoint the loop.',
         )
+        onDetected?.(recent)
       }
     } else if (hist.length <= 2) {
       // Settled down — re-arm so a later, distinct loop is still reported.
       reportedRef.current = false
     }
-  }, [location.pathname, location.search])
+  }, [location.pathname, location.search, onDetected])
 
   return null
 }
