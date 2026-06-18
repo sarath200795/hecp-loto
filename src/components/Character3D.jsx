@@ -154,14 +154,15 @@ function Rig({ mode = 'idle', facing = 1 }) {
 export default function Character3D({ mode = 'idle', size = 68, facing = 1, fallback = null }) {
   const w = size
   const h = Math.round(size * 1.35)
-  const glRef = useRef(null)
   // Pause the GPU render loop while the tab is hidden — there's no point
   // animating an offscreen canvas, and backgrounded contexts are the most
   // likely to be dropped by the browser (the "Context Lost" warning).
   const [frameloop, setFrameloop] = useState(
     typeof document !== 'undefined' && document.hidden ? 'never' : 'always',
   )
-  // Show the 2D fallback if the WebGL context is lost until it's restored.
+  // Fall back to the 2D character if the WebGL context is lost, until it's
+  // restored. (Three.js already calls preventDefault internally, so the
+  // browser attempts to restore the context on its own.)
   const [lost, setLost] = useState(false)
 
   useEffect(() => {
@@ -170,39 +171,9 @@ export default function Character3D({ mode = 'idle', size = 68, facing = 1, fall
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [])
 
-  // Free the WebGL context on unmount so contexts don't accumulate across
-  // mounts (re-entering /app) and force the browser to drop older ones.
-  useEffect(
-    () => () => {
-      const gl = glRef.current
-      if (!gl) return
-      try {
-        gl.forceContextLoss()
-      } catch {
-        /* ignore */
-      }
-      try {
-        gl.dispose()
-      } catch {
-        /* ignore */
-      }
-    },
-    [],
-  )
-
   const handleCreated = ({ gl }) => {
-    glRef.current = gl
     const canvas = gl.domElement
-    canvas.addEventListener(
-      'webglcontextlost',
-      (e) => {
-        // Allow the browser to restore the context instead of tearing it down
-        // permanently (the default), which is what logs "Context Lost".
-        e.preventDefault()
-        setLost(true)
-      },
-      false,
-    )
+    canvas.addEventListener('webglcontextlost', () => setLost(true), false)
     canvas.addEventListener('webglcontextrestored', () => setLost(false), false)
   }
 
@@ -211,7 +182,7 @@ export default function Character3D({ mode = 'idle', size = 68, facing = 1, fall
       <Canvas
         frameloop={frameloop}
         dpr={[1, 1.5]}
-        gl={{ alpha: true, antialias: true, powerPreference: 'low-power', failIfMajorPerformanceCaveat: false }}
+        gl={{ alpha: true, antialias: true }}
         camera={{ position: [0, 0, 6.6], fov: 30 }}
         style={{ background: 'transparent' }}
         onCreated={handleCreated}
