@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { MotionConfig } from 'framer-motion'
 import { Toaster } from 'react-hot-toast'
 import App from './App.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 // Self-hosted Inter (no external font CDN → no CSP/privacy concerns).
 import '@fontsource/inter/400.css'
@@ -19,7 +20,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       {/* Respect the OS "reduce motion" setting across all Framer Motion animations. */}
       <MotionConfig reducedMotion="user">
         <AuthProvider>
-          <App />
+          <ErrorBoundary>
+            <App />
+          </ErrorBoundary>
           <Toaster
             position="top-right"
             toastOptions={{

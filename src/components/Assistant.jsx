@@ -368,7 +368,12 @@ export default function Assistant() {
           ) : (
             <AvatarBoundary fallback={<div style={{ transform: `scaleX(${facing})` }}><Character mode={shownMode} reduced /></div>}>
               <Suspense fallback={<div style={{ transform: `scaleX(${facing})` }}><Character mode={shownMode} reduced /></div>}>
-                <Character3D mode={shownMode} size={68} facing={facing} />
+                <Character3D
+                  mode={shownMode}
+                  size={68}
+                  facing={facing}
+                  fallback={<div style={{ transform: `scaleX(${facing})` }}><Character mode={shownMode} reduced /></div>}
+                />
               </Suspense>
             </AvatarBoundary>
           )}

@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext'
 import { USER_STATUS } from '../constants/roles'
 
 export default function PendingApproval() {
-  const { firebaseUser, profile, profileStatus, org, loading, logout } = useAuth()
+  const { firebaseUser, profile, profileStatus, org, loading, authReady, logout } = useAuth()
   const navigate = useNavigate()
 
   // Auto-advance the moment an admin approves (profile updates in real time).
@@ -18,7 +18,7 @@ export default function PendingApproval() {
     }
   }, [profile?.status, navigate])
 
-  if (loading || profileStatus === 'loading') return <FullScreenLoader />
+  if (!authReady || loading || profileStatus === 'loading') return <FullScreenLoader />
   if (!firebaseUser) return <Navigate to="/login" replace />
   // Authenticated but no organization profile → recovery screen, not a loader.
   if (profileStatus !== 'ready' || !profile) {

@@ -68,8 +68,8 @@ function AppLayout() {
 // authenticated session without a profile is left on the auth page so the
 // user can finish registering/joining (no bounce into a loader).
 function PublicOnly({ children }) {
-  const { firebaseUser, profile, profileStatus, loading } = useAuth()
-  if (loading || profileStatus === 'loading') return <FullScreenLoader />
+  const { firebaseUser, profile, profileStatus, loading, authReady } = useAuth()
+  if (!authReady || loading || profileStatus === 'loading') return <FullScreenLoader />
   if (firebaseUser && profileStatus === 'ready' && profile) {
     return (
       <Navigate
