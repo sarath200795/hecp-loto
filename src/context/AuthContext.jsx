@@ -153,8 +153,16 @@ export function AuthProvider({ children }) {
     return cred.user
   }
 
-  function logout() {
-    return signOut(auth)
+  async function logout() {
+    try {
+      await signOut(auth)
+    } finally {
+      // Hard-redirect to a clean login page. A full reload guarantees a fresh
+      // mount on /login instead of a client-side, animated-route redirect that
+      // can stall into a blank page on the way out, and it clears all
+      // in-memory app state on sign-out.
+      window.location.assign('/login')
+    }
   }
 
   /** Send a password-reset email to the given address. */
