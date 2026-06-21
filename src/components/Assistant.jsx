@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, lazy, Suspense, Component } from 
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion, useMotionValue, animate } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
+import { useTutorial } from '../context/TutorialContext'
 import { useOrgProcedures, useOrgEvents } from '../hooks/useOrgProcedures'
 import { useSites } from '../hooks/useSites'
 import { useTechnicians } from '../hooks/useTechnicians'
@@ -43,7 +44,7 @@ const SKIN = '#e8b48f', SKIN_D = '#c98b62', HAT = '#f4b400', HAT_D = '#c98a00'
 const VEST = '#2563eb', VEST_D = '#1e40af', STRIPE = '#fde047', TROUSER = '#1e3a8a', SHOE = '#0b1220'
 
 // ── Safety Manager "Sam": hard hat + hi-vis vest, two-segment arms ───────────
-function Character({ mode = 'idle', reduced = false }) {
+export function Character({ mode = 'idle', reduced = false }) {
   const walking = mode === 'walk'
   const sleeping = mode === 'sleep'
 
@@ -184,6 +185,7 @@ export default function Assistant() {
   const location = useLocation()
   const navigate = useNavigate()
   const { profile } = useAuth()
+  const { active: tourActive } = useTutorial()
   const { procedures } = useOrgProcedures()
   const { events } = useOrgEvents()
   const { sites } = useSites()
@@ -336,6 +338,9 @@ export default function Assistant() {
     })
   }
   useEffect(() => { if (open && scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight }, [messages, open])
+
+  // While the first-login tour is running it drives its own Sam — hide this one.
+  if (tourActive) return null
 
   // Disabled → small restore button only.
   if (!enabled) {

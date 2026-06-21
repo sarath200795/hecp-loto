@@ -24,12 +24,13 @@ const ICONS = {
   sites: <Icon d={<><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></>} />,
 }
 
-function NavItem({ to, end, icon, label, onClick }) {
+function NavItem({ to, end, icon, label, onClick, dataTour }) {
   return (
     <NavLink
       to={to}
       end={end}
       onClick={onClick}
+      data-tour={dataTour}
       className={({ isActive }) =>
         `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors duration-150 ease-out-strong ${
           isActive
@@ -88,26 +89,26 @@ function SidebarContent({ onNavigate }) {
       {/* Nav groups */}
       <nav className="flex-1 overflow-y-auto px-3 pb-2">
         <Group title="Overview">
-          <NavItem to="/app" end icon={ICONS.home} label="Dashboard" onClick={onNavigate} />
+          <NavItem to="/app" end icon={ICONS.home} label="Dashboard" onClick={onNavigate} dataTour="nav-dashboard" />
         </Group>
 
         {can(PERMISSIONS.PROCEDURE_VIEW) && (
           <Group title="LOTO">
             {can(PERMISSIONS.LOTO_PERFORM) && (
-              <NavItem to="/app/operations" icon={ICONS.operate} label="LOTO Operations" onClick={onNavigate} />
+              <NavItem to="/app/operations" icon={ICONS.operate} label="LOTO Operations" onClick={onNavigate} dataTour="nav-operations" />
             )}
-            <NavItem to="/app/inventory" icon={ICONS.inventory} label="Procedure Inventory" onClick={onNavigate} />
-            <NavItem to="/app/register" icon={ICONS.register} label="LOTO Register" onClick={onNavigate} />
+            <NavItem to="/app/inventory" icon={ICONS.inventory} label="Procedure Inventory" onClick={onNavigate} dataTour="nav-inventory" />
+            <NavItem to="/app/register" icon={ICONS.register} label="LOTO Register" onClick={onNavigate} dataTour="nav-register" />
             {can(PERMISSIONS.PROCEDURE_CREATE) && (
-              <NavItem to="/app/procedures/new" icon={ICONS.create} label="Create Procedure" onClick={onNavigate} />
+              <NavItem to="/app/procedures/new" icon={ICONS.create} label="Create Procedure" onClick={onNavigate} dataTour="nav-create" />
             )}
           </Group>
         )}
 
         {isAdmin && (
           <Group title="Admin">
-            <NavItem to="/app/approvals" icon={ICONS.approvals} label="Approvals" onClick={onNavigate} />
-            <NavItem to="/app/users" icon={ICONS.users} label="Users" onClick={onNavigate} />
+            <NavItem to="/app/approvals" icon={ICONS.approvals} label="Approvals" onClick={onNavigate} dataTour="nav-approvals" />
+            <NavItem to="/app/users" icon={ICONS.users} label="Users" onClick={onNavigate} dataTour="nav-users" />
             <NavItem to="/app/sites" icon={ICONS.sites} label="Sites" onClick={onNavigate} />
             <NavItem to="/app/technicians" icon={ICONS.tech} label="Technicians" onClick={onNavigate} />
             <NavItem to="/app/locks" icon={ICONS.locks} label="Lock Inventory" onClick={onNavigate} />

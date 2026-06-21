@@ -97,10 +97,17 @@ service cloud.firestore {
         );
 
       // Only an org manager may change another member's role/status/permissions,
-      // and may never move a user to a different organization.
-      allow update: if isOrgManager(resource.data.orgId)
-        && request.auth.uid != uid
-        && orgUnchanged();
+      // and may never move a user to a different organization. Separately, a
+      // user may flip ONLY their own `tutorialCompleted` onboarding flag.
+      allow update: if (
+          isOrgManager(resource.data.orgId)
+          && request.auth.uid != uid
+          && orgUnchanged()
+        ) || (
+          request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['tutorialCompleted'])
+          && request.resource.data.tutorialCompleted is bool
+        );
 
       allow delete: if false;
     }
