@@ -28,6 +28,8 @@ import {
   USER_STATUS,
   hasPermission as listHasPermission,
   permissionsForRole,
+  permissionsForRoles,
+  rolesOf,
 } from '../constants/roles'
 import { clearSessionExpiredFlag, logActivity } from '../utils/session'
 
@@ -359,8 +361,14 @@ export function AuthProvider({ children }) {
 
   // ----- Derived helpers ------------------------------------------------------
 
-  const can = (permission) => listHasPermission(profile?.permissions, permission)
-  const isAdmin = profile?.role === ROLES.ADMIN
+  // Multi-role: effective permissions = explicitly-granted ∪ defaults for every
+  // role the user holds. Admin implies everything.
+  const myRoles = rolesOf(profile)
+  const isAdmin = profile?.isAdmin === true || myRoles.includes(ROLES.ADMIN)
+  const effectivePermissions = isAdmin
+    ? Object.values(PERMISSIONS)
+    : [...new Set([...(profile?.permissions || []), ...permissionsForRoles(myRoles)])]
+  const can = (permission) => isAdmin || listHasPermission(effectivePermissions, permission)
   const isApproved = profile?.status === USER_STATUS.APPROVED
 
   const value = useMemo(

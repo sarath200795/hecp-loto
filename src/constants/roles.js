@@ -106,6 +106,19 @@ export function permissionsForRole(role) {
   return ROLE_PERMISSIONS[role] ? [...ROLE_PERMISSIONS[role]] : []
 }
 
+/** Union of default permissions across several roles (multi-role users). */
+export function permissionsForRoles(roles) {
+  const set = new Set()
+  ;(roles || []).forEach((r) => permissionsForRole(r).forEach((p) => set.add(p)))
+  return [...set]
+}
+
+/** Normalise a profile to multi-role: ensure roles[] and admin flag. */
+export function rolesOf(profile) {
+  if (Array.isArray(profile?.roles) && profile.roles.length) return profile.roles
+  return profile?.role ? [profile.role] : []
+}
+
 /** True when the given permission list contains the key. */
 export function hasPermission(permissions, key) {
   return Array.isArray(permissions) && permissions.includes(key)
