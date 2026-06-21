@@ -1,12 +1,16 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useTutorial } from '../context/TutorialContext'
 import { Character } from './Assistant'
 
-const SAM_W = 62
-const SAM_H = 116
+// Use the real 3D Sam during the tour (matching the roaming assistant); fall
+// back to the lightweight 2D Sam while the three.js chunk loads.
+const Character3D = lazy(() => import('./Character3D'))
+
+const SAM_W = 80
+const SAM_H = 108
 const DONE_KEY = 'hecp:tutorialDone'
 
 // Build the ordered tour steps from the user's permissions, so every targeted
@@ -16,12 +20,14 @@ function buildSteps({ can, isAdmin, PERMISSIONS }) {
     {
       id: 'welcome',
       center: true,
+      route: '/app',
       title: "Hi, I'm Sam 👷",
       text: "Welcome aboard! Let me give you a quick 30-second tour of your safety portal.",
     },
     {
       id: 'nav-dashboard',
       target: 'nav-dashboard',
+      route: '/app',
       title: 'Your Dashboard',
       text: 'This is home base — a live overview of your LOTO activity and anything needing attention.',
     },
@@ -30,6 +36,7 @@ function buildSteps({ can, isAdmin, PERMISSIONS }) {
     steps.push({
       id: 'nav-operations',
       target: 'nav-operations',
+      route: '/app/operations',
       title: 'LOTO Operations',
       text: 'Start and manage lock-out / tag-out operations — apply and remove your locks here.',
     })
@@ -38,12 +45,14 @@ function buildSteps({ can, isAdmin, PERMISSIONS }) {
     steps.push({
       id: 'nav-inventory',
       target: 'nav-inventory',
+      route: '/app/inventory',
       title: 'Procedure Inventory',
       text: 'Browse every LOTO procedure in your organization, with steps, energy sources and QR tags.',
     })
     steps.push({
       id: 'nav-register',
       target: 'nav-register',
+      route: '/app/register',
       title: 'LOTO Register',
       text: "The live, color-coded register shows exactly what's locked out right now.",
     })
@@ -60,12 +69,14 @@ function buildSteps({ can, isAdmin, PERMISSIONS }) {
     steps.push({
       id: 'nav-approvals',
       target: 'nav-approvals',
+      route: '/app/approvals',
       title: 'Approvals',
       text: 'New teammates land here for you to approve and assign a role.',
     })
     steps.push({
       id: 'nav-users',
       target: 'nav-users',
+      route: '/app/users',
       title: 'Team & Permissions',
       text: 'Manage roles and fine-grained permissions for everyone in your org.',
     })
@@ -73,6 +84,7 @@ function buildSteps({ can, isAdmin, PERMISSIONS }) {
   steps.push({
     id: 'finish',
     center: true,
+    route: '/app',
     title: "You're all set!",
     text: 'That’s the tour. Tap me any time at the bottom-left if you need a hand. Stay safe out there!',
   })
@@ -87,11 +99,13 @@ export default function Tutorial() {
   const { profile, isApproved, can, isAdmin, PERMISSIONS, completeTutorial } = useAuth()
   const { setActive } = useTutorial()
   const location = useLocation()
+  const navigate = useNavigate()
 
   const [running, setRunning] = useState(false)
   const [index, setIndex] = useState(0)
   const [rect, setRect] = useState(null)
   const [walking, setWalking] = useState(false)
+  const lastPosRef = useRef({ x: 0, y: 0 })
 
   const steps = useMemo(
     () => buildSteps({ can, isAdmin, PERMISSIONS }),
@@ -120,6 +134,14 @@ export default function Tutorial() {
     }, 900)
     return () => clearTimeout(t)
   }, [running, isApproved, profile, location.pathname, setActive])
+
+  // Walk the user THROUGH the app: navigate to each step's route so they see
+  // the section Sam is describing (the sidebar highlight stays put).
+  useEffect(() => {
+    if (!running || !step?.route) return
+    if (location.pathname !== step.route) navigate(step.route)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running, index])
 
   // Measure the current target element (and keep it in sync on scroll/resize).
   useLayoutEffect(() => {
@@ -151,7 +173,7 @@ export default function Tutorial() {
   useEffect(() => {
     if (!running) return undefined
     setWalking(true)
-    const t = setTimeout(() => setWalking(false), 820)
+    const t = setTimeout(() => setWalking(false), 1600)
     return () => clearTimeout(t)
   }, [index, running])
 
@@ -179,9 +201,13 @@ export default function Tutorial() {
     }
   }
 
-  // On a targeted step Sam stands to the right of the sidebar, so face him left
-  // toward the highlighted item; centered (welcome/finish) faces forward.
-  const facing = centered ? 1 : -1
+  // Walk duration scales with distance so Sam appears to actually walk over,
+  // not teleport. Facing follows the horizontal travel direction.
+  const last = lastPosRef.current
+  const dist = Math.hypot(samX - last.x, samY - last.y)
+  const walkDur = clamp(dist / 320, 0.5, 1.6)
+  const facing = Math.abs(samX - last.x) > 6 ? (samX >= last.x ? 1 : -1) : centered ? 1 : -1
+  lastPosRef.current = { x: samX, y: samY }
 
   const isFirst = index === 0
   const isLast = index === steps.length - 1
@@ -224,17 +250,23 @@ export default function Tutorial() {
         />
       )}
 
-      {/* Sam walks to the spot. */}
+      {/* Sam walks to the spot — the real 3D Sam, with a 2D fallback on load. */}
       <motion.div
         className="absolute"
         initial={false}
         animate={{ x: samX, y: samY }}
-        transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+        transition={{ duration: walkDur, ease: [0.23, 1, 0.32, 1] }}
         style={{ width: SAM_W, height: SAM_H, top: 0, left: 0 }}
       >
-        <div style={{ transform: `scaleX(${facing})` }}>
-          <Character mode={walking ? 'walk' : 'wave'} />
-        </div>
+        <Suspense
+          fallback={
+            <div style={{ transform: `scaleX(${facing})` }}>
+              <Character mode={walking ? 'walk' : 'wave'} />
+            </div>
+          }
+        >
+          <Character3D mode={walking ? 'walk' : 'wave'} size={SAM_W} facing={facing} />
+        </Suspense>
       </motion.div>
 
       {/* Tooltip / step card. */}
