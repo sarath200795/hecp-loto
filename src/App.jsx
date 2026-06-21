@@ -6,6 +6,8 @@ import Footer from './components/Footer'
 import SessionTimeout from './components/SessionTimeout'
 import Assistant from './components/Assistant'
 import ProtectedRoute from './components/ProtectedRoute'
+import Tutorial from './components/Tutorial'
+import { TutorialProvider } from './context/TutorialContext'
 import { useAuth } from './context/AuthContext'
 import { isFirebaseConfigured } from './firebase/config'
 import { PERMISSIONS, USER_STATUS } from './constants/roles'
@@ -52,15 +54,18 @@ function Page({ children }) {
 
 function AppLayout() {
   return (
-    <div className="min-h-screen bg-clay">
-      <SessionTimeout />
-      <Sidebar />
-      <main className="lg:ml-64">
-        <Outlet />
-        <Footer />
-      </main>
-      <Assistant />
-    </div>
+    <TutorialProvider>
+      <div className="min-h-screen bg-clay">
+        <SessionTimeout />
+        <Sidebar />
+        <main className="lg:ml-64">
+          <Outlet />
+          <Footer />
+        </main>
+        <Assistant />
+        <Tutorial />
+      </div>
+    </TutorialProvider>
   )
 }
 

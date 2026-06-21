@@ -172,6 +172,27 @@ export function AuthProvider({ children }) {
     return sendPasswordResetEmail(auth, email.trim())
   }
 
+  /**
+   * Mark the first-login guided tour as completed. Persists to the user's
+   * profile (so it's remembered across devices) and always records a
+   * localStorage fallback — the latter covers browsers where the Firestore
+   * rules update hasn't been deployed yet, so the tour never re-shows here.
+   */
+  async function completeTutorial() {
+    try {
+      localStorage.setItem('hecp:tutorialDone', '1')
+    } catch {
+      // ignore storage failures
+    }
+    const user = auth.currentUser
+    if (!user) return
+    try {
+      await setDoc(doc(db, 'users', user.uid), { tutorialCompleted: true }, { merge: true })
+    } catch (err) {
+      console.warn('[HECP] Could not save tutorialCompleted to profile:', err?.code || err)
+    }
+  }
+
   /** List all organizations (id + name) for the join dropdown. */
   async function listOrganizations() {
     const snap = await getDocs(collection(db, 'organizations'))
@@ -387,6 +408,7 @@ export function AuthProvider({ children }) {
       login,
       logout,
       resetPassword,
+      completeTutorial,
       registerOrganization,
       signupMember,
       completeOrgRegistration,
