@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
+import { useTutorial } from '../context/TutorialContext'
 import { RoleBadge } from './ui/Badge'
 import LockMcbMark from './LockMcbMark'
 
@@ -58,6 +59,7 @@ function Group({ title, children }) {
 
 function SidebarContent({ onNavigate }) {
   const { profile, org, isAdmin, can, PERMISSIONS, logout } = useAuth()
+  const { start: startTour } = useTutorial()
   const navigate = useNavigate()
 
   async function handleLogout() {
@@ -115,6 +117,20 @@ function SidebarContent({ onNavigate }) {
           </Group>
         )}
       </nav>
+
+      {/* Replay the guided tour */}
+      <div className="px-3 pb-1">
+        <button
+          onClick={() => { startTour(); onNavigate?.() }}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-[#cfc9bf] transition-colors duration-150 hover:bg-white/5 hover:text-white"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <circle cx="12" cy="12" r="9" />
+            <path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8z" />
+          </svg>
+          <span>Take a tour</span>
+        </button>
+      </div>
 
       {/* User card */}
       <div className="border-t border-white/10 p-3">
