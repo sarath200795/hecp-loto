@@ -22,7 +22,7 @@ jobs:
     # automatically if the repository is made public or GHAS is enabled.
     if: ${{ github.event.repository.private == false }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
