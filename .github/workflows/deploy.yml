@@ -24,24 +24,32 @@ jobs:
         with:
           node-version: 20
 
-      # Skip cleanly (green) if the deploy token isn't configured yet.
-      - name: Check Vercel token
-        id: check
+      # A green "Deploy" check must mean an actual deploy. On a push to main
+      # (production) we FAIL loudly when credentials are missing instead of
+      # skipping silently. On pull requests (preview) we only warn, so a missing
+      # token doesn't block merges.
+      - name: Check Vercel credentials
+        id: creds
         run: |
-          if [ -n "${{ secrets.VERCEL_TOKEN }}" ]; then
+          if [ -n "${{ secrets.VERCEL_TOKEN }}" ] && [ -n "${{ secrets.VERCEL_ORG_ID }}" ] && [ -n "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
             echo "ok=true" >> "$GITHUB_OUTPUT"
           else
             echo "ok=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::VERCEL_TOKEN/ORG/PROJECT not set — skipping deploy. Add repo secrets to enable CD."
+            if [ "${{ github.event_name }}" = "push" ]; then
+              echo "::error::Production deploy aborted — set the VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID repo secrets (Settings → Secrets and variables → Actions) to enable CD."
+              exit 1
+            else
+              echo "::warning::Vercel secrets not set — skipping preview deploy."
+            fi
           fi
 
       - name: Install Vercel CLI
-        if: steps.check.outputs.ok == 'true'
+        if: steps.creds.outputs.ok == 'true'
         run: npm install -g vercel@latest
 
       # ---- Production (push to main) ----
       - name: Deploy production
-        if: steps.check.outputs.ok == 'true' && github.event_name == 'push'
+        if: steps.creds.outputs.ok == 'true' && github.event_name == 'push'
         run: |
           vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
           vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
@@ -50,7 +58,7 @@ jobs:
 
       # ---- Preview (pull requests) ----
       - name: Deploy preview
-        if: steps.check.outputs.ok == 'true' && github.event_name == 'pull_request'
+        if: steps.creds.outputs.ok == 'true' && github.event_name == 'pull_request'
         run: |
           vercel pull --yes --environment=preview --token="${{ secrets.VERCEL_TOKEN }}"
           vercel build --token="${{ secrets.VERCEL_TOKEN }}"
