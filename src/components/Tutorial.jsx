@@ -97,7 +97,7 @@ function clamp(v, min, max) {
 
 export default function Tutorial() {
   const { profile, isApproved, can, isAdmin, PERMISSIONS, completeTutorial } = useAuth()
-  const { setActive } = useTutorial()
+  const { setActive, startSignal } = useTutorial()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -106,6 +106,7 @@ export default function Tutorial() {
   const [rect, setRect] = useState(null)
   const [walking, setWalking] = useState(false)
   const lastPosRef = useRef({ x: 0, y: 0 })
+  const startedSignalRef = useRef(0)
 
   const steps = useMemo(
     () => buildSteps({ can, isAdmin, PERMISSIONS }),
@@ -134,6 +135,17 @@ export default function Tutorial() {
     }, 900)
     return () => clearTimeout(t)
   }, [running, isApproved, profile, location.pathname, setActive])
+
+  // Manual replay: a "Take a tour" button bumps startSignal — start regardless
+  // of whether the tour was already completed.
+  useEffect(() => {
+    if (startSignal > 0 && startSignal !== startedSignalRef.current) {
+      startedSignalRef.current = startSignal
+      setIndex(0)
+      setRunning(true)
+      setActive(true)
+    }
+  }, [startSignal, setActive])
 
   // Walk the user THROUGH the app: navigate to each step's route so they see
   // the section Sam is describing (the sidebar highlight stays put).
