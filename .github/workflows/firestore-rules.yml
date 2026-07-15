@@ -29,7 +29,7 @@ jobs:
             echo "::warning::FIREBASE_SERVICE_ACCOUNT not set — skipping rules deploy. Add the secret to enable."
           fi
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.check.outputs.ok == 'true'
         with:
           node-version: 20
